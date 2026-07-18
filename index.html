@@ -1,0 +1,739 @@
+<title>やさい手帳</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="theme-color" content="#4d7a3f" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="やさい手帳" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<link rel="icon" href="icon-180.png" />
+<style>
+  :root {
+    --bg-outer: #ece7d9;
+    --app-bg: #faf8f1;
+    --card-bg: #ffffff;
+    --ink: #262b1f;
+    --ink-soft: #6f7663;
+    --line: #e3ddc9;
+    --accent: #4d7a3f;
+    --accent-contrast: #ffffff;
+    --grow: #c9703f;
+    --grow-soft: #f7e9df;
+    --season-spring-summer: #7a9a52;
+    --season-summer-autumn: #3f6b4d;
+    --season-autumn-spring: #b3803f;
+    --season-year-round: #7c6a9e;
+    --watch-soft: #e9eef2;
+    --watch-ink: #47617a;
+    --offgrade-soft: #f6ede0;
+    --offgrade-ink: #93662f;
+    --shadow-card: 0 1px 2px rgba(38,43,31,0.06), 0 3px 10px rgba(38,43,31,0.06);
+    --shadow-frame: 0 30px 70px rgba(38,43,31,0.28);
+    --shadow-sheet: 0 -8px 30px rgba(38,43,31,0.18);
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-outer: #0e0f0a;
+      --app-bg: #181a13;
+      --card-bg: #23261a;
+      --ink: #ece8da;
+      --ink-soft: #a4a894;
+      --line: #34381f;
+      --accent: #8fb377;
+      --accent-contrast: #14170e;
+      --grow: #e08b5e;
+      --grow-soft: #35291f;
+      --season-spring-summer: #8fb377;
+      --season-summer-autumn: #6fa085;
+      --season-autumn-spring: #c79a63;
+      --season-year-round: #a6a4cf;
+      --watch-soft: #202832;
+      --watch-ink: #9dc0dc;
+      --offgrade-soft: #332a1c;
+      --offgrade-ink: #d1a76f;
+      --shadow-card: 0 1px 2px rgba(0,0,0,0.35), 0 3px 12px rgba(0,0,0,0.3);
+      --shadow-frame: 0 30px 70px rgba(0,0,0,0.5);
+      --shadow-sheet: 0 -8px 30px rgba(0,0,0,0.4);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg-outer: #0e0f0a;
+    --app-bg: #181a13;
+    --card-bg: #23261a;
+    --ink: #ece8da;
+    --ink-soft: #a4a894;
+    --line: #34381f;
+    --accent: #8fb377;
+    --accent-contrast: #14170e;
+    --grow: #e08b5e;
+    --grow-soft: #35291f;
+    --season-spring-summer: #8fb377;
+    --season-summer-autumn: #6fa085;
+    --season-autumn-spring: #c79a63;
+    --season-year-round: #a6a4cf;
+    --watch-soft: #202832;
+    --watch-ink: #9dc0dc;
+    --offgrade-soft: #332a1c;
+    --offgrade-ink: #d1a76f;
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.35), 0 3px 12px rgba(0,0,0,0.3);
+    --shadow-frame: 0 30px 70px rgba(0,0,0,0.5);
+    --shadow-sheet: 0 -8px 30px rgba(0,0,0,0.4);
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --bg-outer: #ece7d9;
+    --app-bg: #faf8f1;
+    --card-bg: #ffffff;
+    --ink: #262b1f;
+    --ink-soft: #6f7663;
+    --line: #e3ddc9;
+    --accent: #4d7a3f;
+    --accent-contrast: #ffffff;
+    --grow: #c9703f;
+    --grow-soft: #f7e9df;
+    --season-spring-summer: #7a9a52;
+    --season-summer-autumn: #3f6b4d;
+    --season-autumn-spring: #b3803f;
+    --season-year-round: #7c6a9e;
+    --watch-soft: #e9eef2;
+    --watch-ink: #47617a;
+    --offgrade-soft: #f6ede0;
+    --offgrade-ink: #93662f;
+    --shadow-card: 0 1px 2px rgba(38,43,31,0.06), 0 3px 10px rgba(38,43,31,0.06);
+    --shadow-frame: 0 30px 70px rgba(38,43,31,0.28);
+    --shadow-sheet: 0 -8px 30px rgba(38,43,31,0.18);
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: var(--bg-outer);
+    color: var(--ink);
+    font-family: "Yu Gothic", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  button { font-family: inherit; }
+
+  /* ===== アプリフレーム ===== */
+  .app-frame {
+    position: relative;
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    background: var(--app-bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  @media (min-width: 431px) {
+    body { padding: 32px 16px; }
+    .app-frame {
+      min-height: 780px;
+      height: 844px;
+      border-radius: 34px;
+      box-shadow: var(--shadow-frame);
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+  }
+
+  .app-header {
+    flex: 0 0 auto;
+    padding: 18px 20px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--line);
+    background: var(--app-bg);
+  }
+  .app-header .brand-mark {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: var(--accent-contrast);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .app-header .brand-mark svg { width: 19px; height: 19px; }
+  .app-header h1 {
+    font-size: 1.05rem;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  .app-header .brand-sub {
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    margin: 1px 0 0;
+  }
+
+  /* ===== スクロール本体 ===== */
+  .app-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 14px 0 20px;
+  }
+  .view { display: none; padding: 0 18px; }
+  .view.is-active { display: block; }
+
+  /* 季節フィルターチップ */
+  .chip-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 2px 0 14px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .chip-row::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto;
+    font-size: 0.82rem;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--card-bg);
+    color: var(--ink-soft);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .chip.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-contrast);
+    font-weight: 700;
+  }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* 野菜リスト */
+  .veg-list { display: flex; flex-direction: column; gap: 10px; }
+  .veg-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 11px 14px;
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+  }
+  .veg-row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .monogram {
+    flex: 0 0 auto;
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #fff;
+  }
+  .veg-row-main { flex: 1 1 auto; min-width: 0; }
+  .veg-row-name {
+    font-size: 0.98rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .veg-row-sub {
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .grow-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--grow);
+    flex: 0 0 auto;
+  }
+  .row-chevron { flex: 0 0 auto; color: var(--ink-soft); }
+  .row-chevron svg { width: 16px; height: 16px; display: block; }
+
+  .empty-state {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.86rem;
+    padding: 60px 20px;
+  }
+  .empty-state svg { width: 40px; height: 40px; margin-bottom: 10px; opacity: 0.5; }
+
+  .section-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 4px 0 10px;
+  }
+
+  /* コツタブ */
+  .tip-card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow-card);
+    padding: 13px 15px;
+    font-size: 0.88rem;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .tip-card .tip-index {
+    flex: 0 0 auto;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-contrast);
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== 詳細シート ===== */
+  .sheet-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 20, 12, 0.42);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+    z-index: 20;
+  }
+  .sheet-overlay.is-open { opacity: 1; pointer-events: auto; }
+
+  .detail-sheet {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    max-height: 88%;
+    background: var(--app-bg);
+    border-radius: 22px 22px 0 0;
+    box-shadow: var(--shadow-sheet);
+    transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(.2,.8,.2,1);
+    z-index: 21;
+    display: flex;
+    flex-direction: column;
+  }
+  .sheet-overlay.is-open .detail-sheet { transform: translateY(0); }
+
+  .sheet-handle {
+    width: 36px; height: 4px;
+    border-radius: 3px;
+    background: var(--line);
+    margin: 10px auto 4px;
+    flex: 0 0 auto;
+  }
+  .sheet-head {
+    flex: 0 0 auto;
+    padding: 6px 20px 14px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .sheet-head .titles h2 { font-size: 1.25rem; margin: 0; }
+  .sheet-head .titles .family-tag {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 0.75rem;
+    padding: 2px 9px;
+    border-radius: 999px;
+    color: #fff;
+  }
+  .sheet-close {
+    flex: 0 0 auto;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: var(--line);
+    color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .sheet-close svg { width: 15px; height: 15px; }
+
+  .sheet-body {
+    overflow-y: auto;
+    padding: 16px 20px 24px;
+  }
+
+  .grow-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px 16px;
+    border-radius: 12px;
+    border: 1.5px solid var(--grow);
+    background: transparent;
+    color: var(--grow);
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 16px;
+  }
+  .grow-toggle svg { width: 17px; height: 17px; }
+  .grow-toggle.is-growing {
+    background: var(--grow);
+    color: #fff;
+  }
+
+  .fact-grid {
+    display: grid;
+    grid-template-columns: 5.6em 1fr;
+    row-gap: 7px;
+    column-gap: 10px;
+    margin: 0 0 16px;
+    font-size: 0.86rem;
+  }
+  .fact-row { display: contents; }
+  .fact-grid dt { color: var(--ink-soft); margin: 0; }
+  .fact-grid dd { margin: 0; }
+
+  .note-block {
+    border-radius: 12px;
+    padding: 11px 13px;
+    font-size: 0.86rem;
+    line-height: 1.65;
+    margin-bottom: 10px;
+  }
+  .note-label {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-right: 0.6em;
+    border-radius: 4px;
+    padding: 0 5px;
+  }
+  .note-watch { background: var(--watch-soft); }
+  .note-watch .note-label { color: var(--watch-ink); border: 1px solid var(--watch-ink); }
+  .note-offgrade { background: var(--offgrade-soft); }
+  .note-offgrade .note-label { color: var(--offgrade-ink); border: 1px solid var(--offgrade-ink); }
+  .note-tip { background: rgba(77,122,63,0.1); }
+  .note-tip .note-label { color: var(--accent); border: 1px solid var(--accent); }
+
+  /* ===== ボトムナビ ===== */
+  .bottom-nav {
+    flex: 0 0 auto;
+    display: flex;
+    border-top: 1px solid var(--line);
+    background: var(--app-bg);
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+  .nav-btn {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 4px 6px;
+    border: none;
+    background: transparent;
+    color: var(--ink-soft);
+    font-size: 0.68rem;
+    cursor: pointer;
+    border-radius: 10px;
+  }
+  .nav-btn svg { width: 21px; height: 21px; }
+  .nav-btn.is-active { color: var(--accent); font-weight: 700; }
+  .nav-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .detail-sheet, .sheet-overlay { transition: none; }
+  }
+</style>
+
+<div class="app-frame">
+
+  <header class="app-header">
+    <span class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-5 0-8-4-8-9a7 7 0 0 1 7-7c1 3 1 5 1 5s3-1 3-6c4 1 6 4.5 6 8.5 0 5-4 8.5-9 8.5z"/><path d="M12 22c0-5 2-8 5-10"/></svg>
+    </span>
+    <div>
+      <h1 id="header-title">やさい手帳</h1>
+      <p class="brand-sub" id="header-sub">季節の野菜を育てよう</p>
+    </div>
+  </header>
+
+  <main class="app-body">
+
+    <!-- ホーム -->
+    <section class="view is-active" data-view="home">
+      <div class="chip-row" id="chip-row"></div>
+      <div class="veg-list" id="home-list"></div>
+    </section>
+
+    <!-- 栽培中 -->
+    <section class="view" data-view="growing">
+      <div id="growing-list"></div>
+    </section>
+
+    <!-- コツ -->
+    <section class="view" data-view="tips">
+      <p class="section-label">共通の栽培のコツ</p>
+      <div id="tips-list"></div>
+    </section>
+
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn is-active" data-nav="home" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      <span>ホーム</span>
+    </button>
+    <button class="nav-btn" data-nav="growing" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-5 0-8-4-8-9a7 7 0 0 1 7-7c1 3 1 5 1 5s3-1 3-6c4 1 6 4.5 6 8.5 0 5-4 8.5-9 8.5z"/></svg>
+      <span>栽培中</span>
+    </button>
+    <button class="nav-btn" data-nav="tips" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a6 6 0 0 0-4 10.5c.6.5 1 1.3 1 2.1V16h6v-1.4c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 2z"/></svg>
+      <span>コツ</span>
+    </button>
+  </nav>
+
+  <div class="sheet-overlay" id="sheet-overlay">
+    <div class="detail-sheet" id="detail-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-name">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head">
+        <div class="titles">
+          <h2 id="sheet-name"></h2>
+          <span class="family-tag" id="sheet-family"></span>
+        </div>
+        <button class="sheet-close" id="sheet-close" type="button" aria-label="閉じる">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="sheet-body" id="sheet-body"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var APP_DATA = {"seasonKeys": ["spring-summer", "summer-autumn", "autumn-spring", "year-round"], "seasonShort": ["春夏", "夏秋冬", "秋春", "通年"], "seasonTitles": ["春植え・夏野菜", "夏植え・秋冬野菜", "秋植え・春〜初夏収穫", "通年・複数シーズン育てられる野菜"], "vegetables": [{"name": "トマト", "family": "ナス科", "sow": "種まき2〜3月（育苗）／植え付け4月下旬〜5月", "harvest": "7月〜9月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり。実がなり始めたら水を控えめにすると甘くなる", "pot": "○（大型プランター・支柱必須）", "pests": "疫病、青枯病、アブラムシ", "watch": "下葉の色（黄変していないか）、果実の尻の部分（黒く陥没していないか）、脇芽の伸び具合を数日おきに確認", "offgrade": "尻腐れ果（実の先端が黒く陥没）はカルシウム不足や水切れが原因。傷んだ部分を取り除けば食べられる。裂果（実の割れ）は乾燥後の急な水やりが原因なので早採りしてスープや加熱調理に回す。", "tips": "脇芽はこまめに摘み取り、主枝1本に仕立てると実付きが良くなる。連作を避ける。", "id": "トマト", "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "ナス", "family": "ナス科", "sow": "植え付け5月上旬〜中旬", "harvest": "6月下旬〜10月", "sun": "日当たり良好な場所", "water": "乾燥に弱いので土が乾く前にたっぷり与える", "pot": "○（大型プランター）", "pests": "アブラムシ、ハダニ、ニジュウヤホシテントウ", "watch": "実のツヤ（ツヤがなくなると育ちすぎのサイン）、ヘタのトゲの鋭さ、葉裏のハダニ・アブラムシの有無", "offgrade": "曲がり果や小さい実は水・肥料切れのサインだが味に問題はないので浅漬けや炒め物に。皮が硬い実は収穫遅れなので、早めの収穫を心がける。", "tips": "梅雨明け頃に枝を切り戻す「更新剪定」をすると秋にもう一度収穫できる。", "id": "ナス", "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "キュウリ", "family": "ウリ科", "sow": "植え付け4月下旬〜5月", "harvest": "6月〜8月", "sun": "日当たり良好な場所", "water": "水切れに弱いので朝夕こまめに与える", "pot": "○（ネットや支柱で誘引）", "pests": "うどんこ病、べと病、ウリハムシ", "watch": "葉の白い粉状の斑点（うどんこ病の兆候）、実の太り方、つるの伸びと巻きひげの元気さ", "offgrade": "曲がりキュウリは肥料・水分不足やつる同士の圧迫が原因だが味は変わらないので漬物や炒め物に使える。", "tips": "生育が早いので実は大きくなりすぎる前（開花後7〜10日）に収穫する。", "id": "キュウリ", "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "ピーマン", "family": "ナス科", "sow": "植え付け5月上旬〜中旬", "harvest": "7月〜10月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "○", "pests": "アブラムシ、タバコガ", "watch": "実のツヤと硬さ、ヘタの切り口の変色、着果数と株の疲れ具合", "offgrade": "小さい・変形した実は日照不足や栄養不足のサインだが、味・食感に問題はなく普通に食べられる。", "tips": "最初の実は早めに収穫して株を疲れさせないようにすると、その後の収量が増える。", "id": "ピーマン", "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "オクラ", "family": "アオイ科", "sow": "種まき5月〜6月（直まき可）", "harvest": "7月〜9月", "sun": "日当たり良好な場所", "water": "土が乾いたらたっぷり", "pot": "○", "pests": "アブラムシ、カメムシ", "watch": "実の長さ（5〜7cmが収穫適期）、莢の角の張り具合、収穫忘れの取り残し果がないか", "offgrade": "採り遅れて大きくなった実は筋張って硬くなるが、刻んで加熱調理（煮物・スープ）すれば食べられる。", "tips": "実が育つのが早いので、5〜7cm程度の若いうちにこまめに収穫する。", "id": "オクラ", "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "枝豆", "family": "マメ科", "sow": "種まき5月〜6月", "harvest": "7月下旬〜9月", "sun": "日当たり良好な場所", "water": "開花〜実入り期はとくに水切れに注意", "pot": "○（浅めのプランターでも可）", "pests": "カメムシ、アブラムシ", "watch": "さやの膨らみ具合（ふっくらしてきたら収穫適期）、株の倒伏、カメムシによる吸汁痕", "offgrade": "実入りが不揃いなさやも茹でれば普通に食べられる。カメムシに吸われた豆は変色・変形するが、その部分だけ避ければ問題ない。", "tips": "マメ科は肥料の窒素分が多いと葉ばかり茂るので控えめに。根粒菌が肥料代わりになる。", "id": "枝豆", "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "大根", "family": "アブラナ科", "sow": "種まき8月下旬〜9月", "harvest": "10月〜12月", "sun": "日当たり良好な場所", "water": "発芽までは乾かさない。その後は土の表面が乾いたらたっぷり", "pot": "○（深型プランター）", "pests": "アブラムシ、コナガ、ヨトウムシ", "watch": "地際から見える根の太さ、葉の茂り方、又根の兆候（土の中の石や未熟堆肥の有無）", "offgrade": "又根（根が枝分かれ）は石や未熟な堆肥の塊が原因だが、味・食感は変わらないので家庭で食べる分には問題ない。ひび割れは肥大しすぎ・急な乾湿差が原因なので見つけたら早めに収穫する。", "tips": "間引きを2〜3回に分けて行い、最終的に株間25〜30cmにすると太く育つ。石は事前に取り除く。", "id": "大根", "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "白菜", "family": "アブラナ科", "sow": "種まき・植え付け8月下旬〜9月", "harvest": "11月〜1月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "△（大型プランターなら可）", "pests": "アオムシ、ヨトウムシ", "watch": "結球の締まり具合（手で押して固さを確認）、外葉の食害、内部への虫の侵入痕", "offgrade": "結球が緩い・小さいのは生育期間不足や株間の詰めすぎが原因。固く巻ききらなくても食べられるので鍋物などに早めに使う。", "tips": "結球し始めたら外葉を軽く紐で結ぶと霜よけになり傷みにくい。防虫ネットで虫害を防ぐ。", "id": "白菜", "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "キャベツ", "family": "アブラナ科", "sow": "植え付け8月〜9月（苗から）", "harvest": "11月〜1月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "○（大型プランター）", "pests": "アオムシ、コナガ", "watch": "結球の固さと大きさ、外葉の虫食い穴、頭頂部の裂け（裂球）の兆候", "offgrade": "裂球（結球部の割れ）は肥大しすぎや急な雨による水分吸収が原因。見つけたらすぐ収穫すれば中身の品質に問題はない。", "tips": "植え付け直後から防虫ネットをかけると青虫被害を大きく減らせる。", "id": "キャベツ", "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "ブロッコリー", "family": "アブラナ科", "sow": "植え付け8月下旬〜9月", "harvest": "11月〜1月（頂花蕾）、その後側花蕾も収穫可", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "○", "pests": "アオムシ、アブラムシ", "watch": "蕾（花蕾）の粒の締まり具合、黄色い花が見え始めていないか（開花直前のサイン）", "offgrade": "蕾が緩んで黄色い花が咲きかけたものは急いで収穫。多少味は落ちるが食べられる。側花蕾は頂花蕾より小さいが同様に食用可。", "tips": "頂花蕾を収穫した後も脇から小さな蕾（側花蕾）が次々出るので長く楽しめる。", "id": "ブロッコリー", "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "ほうれん草", "family": "ヒユ科", "sow": "種まき9月〜10月", "harvest": "10月〜12月", "sun": "日当たり〜半日陰でも可", "water": "乾燥させすぎない程度に", "pot": "○（浅型でも可）", "pests": "アブラムシ、べと病", "watch": "葉色（黄ばみは酸性土壌や肥料切れのサイン）、とう立ち（花芽が伸びていないか）", "offgrade": "とう立ちした株は葉や茎が硬くなるが、若い葉の部分は普通に食べられる。葉に多少の虫食いがあっても洗えば問題ない。", "tips": "酸性土壌が苦手なので、種まき前に苦土石灰を混ぜてpH調整すると発芽・生育が良くなる。", "id": "ほうれん草", "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "小松菜", "family": "アブラナ科", "sow": "種まき9月〜10月（周年栽培も可）", "harvest": "種まきから約1カ月", "sun": "日当たり〜半日陰でも可", "water": "土の表面が乾いたらたっぷり", "pot": "○（浅型プランターで手軽）", "pests": "アブラムシ、アオムシ", "watch": "葉の虫食い穴、株の混み具合、葉の大きさ（20cm前後が収穫目安）", "offgrade": "虫食い穴は見た目だけの問題なので、洗って気になる部分を取り除けば食べられる。育ちすぎて葉が硬い株はおひたしなど加熱調理向き。", "tips": "生育が早く初心者向き。株間を混みすぎないよう間引きながら育てると良い。", "id": "小松菜", "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "玉ねぎ", "family": "ヒガンバナ科", "sow": "苗の植え付け11月頃", "harvest": "翌年5月〜6月", "sun": "日当たり良好な場所", "water": "植え付け直後以外は控えめでよい", "pot": "△（大型プランターなら可）", "pests": "べと病、アブラムシ", "watch": "葉の倒伏（7〜8割の葉が倒れたら収穫サイン）、球の肥大、分球（球が2つに割れていないか）", "offgrade": "小玉や分球（2つ玉）は肥料切れや株間の詰めすぎが原因。味は変わらないが日持ちしにくいので早めに使い切る。", "tips": "冬の間に追肥を2回ほど行うと大きな球に育つ。春以降の追肥は病気の原因になるので控える。", "id": "玉ねぎ", "seasonKey": "autumn-spring", "seasonTitle": "秋植え・春〜初夏収穫", "seasonShort": "秋春", "seasonPeriod": "9月〜11月植え付け／翌春〜初夏収穫"}, {"name": "そら豆", "family": "マメ科", "sow": "種まき10月下旬〜11月", "harvest": "翌年5月〜6月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "○", "pests": "アブラムシ（特に春先に多発）", "watch": "さやの向き（下向き→上向きへの変化）、背筋（黒い筋）の色づき、アブラムシの発生状況（新芽の先端を重点チェック）", "offgrade": "実入りが少ない・小さいさやは肥料や水分不足が原因だが味に問題はない。収穫が遅れて背筋が真っ黒になった豆は硬くなるので早めに茹でる。", "tips": "さやが下向きから上向きに変わり、背筋（黒い筋）が出た頃が収穫の目安。", "id": "そら豆", "seasonKey": "autumn-spring", "seasonTitle": "秋植え・春〜初夏収穫", "seasonShort": "秋春", "seasonPeriod": "9月〜11月植え付け／翌春〜初夏収穫"}, {"name": "いちご", "family": "バラ科", "sow": "苗の植え付け9月〜10月", "harvest": "翌年4月〜6月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり、実に水がかからないように", "pot": "○（プランター・鉢に最適）", "pests": "アブラムシ、ナメクジ、灰色かび病", "watch": "花の受粉状況（ミツバチ・風による受粉が十分か）、実の色づき方、地面に接する実の傷み", "offgrade": "変形果（先端が尖る・複数に分かれた多頭果）は受粉不良が主な原因。味は落ちにくいのでジャムやスムージーに加工すると無駄がない。", "tips": "冬の間はマルチや敷きわらで株元を保温し、ランナー（つる状の茎）は早めに切ると実付きが良くなる。", "id": "いちご", "seasonKey": "autumn-spring", "seasonTitle": "秋植え・春〜初夏収穫", "seasonShort": "秋春", "seasonPeriod": "9月〜11月植え付け／翌春〜初夏収穫"}, {"name": "じゃがいも", "family": "ナス科", "sow": "植え付け（種いも）3月（春作）／9月（秋作）", "harvest": "春作6月頃／秋作11〜12月頃", "sun": "日当たり良好な場所", "water": "芽が出るまでは控えめ、その後は土の表面が乾いたらたっぷり", "pot": "○（深型プランター・袋栽培も人気）", "pests": "テントウムシダマシ、疫病", "watch": "いもの緑化（土から顔を出していないか）、葉の茂り具合、掘り上げ前の茎葉の枯れ具合", "offgrade": "緑化したいもの皮にはソラニンという毒素が含まれるため、緑の部分は厚めに取り除いてから食べる。小さいいもは丸ごと素揚げや煮っころがしに使うと無駄がない。", "tips": "芽が伸びてきたら土寄せを2〜3回行うと、いもが増え緑化も防げる。", "id": "じゃがいも", "seasonKey": "year-round", "seasonTitle": "通年・複数シーズン育てられる野菜", "seasonShort": "通年", "seasonPeriod": "季節を選んで年に複数回栽培可能"}, {"name": "レタス", "family": "キク科", "sow": "種まき・植え付け3月〜5月または9月〜10月", "harvest": "種まきから約2カ月", "sun": "日当たり〜半日陰でも可", "water": "土の表面が乾いたらたっぷり", "pot": "○（浅型プランターで手軽）", "pests": "アブラムシ、ナメクジ", "watch": "結球状況（玉レタスの場合）、とう立ちの兆候、外葉のナメクジ食害痕", "offgrade": "とう立ちすると葉に苦みが増すが、外側の葉は普通に利用できる。結球が緩い株も、ちぎって食べるサラダ用には問題なく使える。", "tips": "高温期（真夏）は発芽しにくいので、春・秋の涼しい時期にまくのがコツ。", "id": "レタス", "seasonKey": "year-round", "seasonTitle": "通年・複数シーズン育てられる野菜", "seasonShort": "通年", "seasonPeriod": "季節を選んで年に複数回栽培可能"}], "commonTips": ["水やりは基本的に「土の表面が乾いたら、鉢底から流れ出るくらいたっぷり」が原則。毎日少量よりも効果的。", "同じ科の野菜を同じ場所で連続して育てる「連作」は病気の原因になりやすいため、栽培場所を年ごとにローテーションする。", "プランター栽培では土の量が限られるため、地植えより水切れ・肥料切れが起きやすい。水やりと追肥の頻度を少し多めに。", "苗を植え付けたら、根が土に落ち着くまで（1週間程度）は特にしっかり水を管理する。", "病害虫の多くは早期発見が対策の基本。葉の裏や新芽を定期的にチェックする習慣をつける。"]};
+
+  var SEASON_COLOR_VARS = {
+    "spring-summer": "--season-spring-summer",
+    "summer-autumn": "--season-summer-autumn",
+    "autumn-spring": "--season-autumn-spring",
+    "year-round": "--season-year-round"
+  };
+
+  var STORAGE_KEY = "yasai-techo-growing-v1";
+
+  function loadGrowing() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+  function saveGrowing(list) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    } catch (e) {}
+  }
+
+  var growingSet = new Set(loadGrowing());
+  var currentFilter = "all";
+  var currentNav = "home";
+
+  function esc(s) {
+    var div = document.createElement("div");
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function seasonColorVar(key) {
+    return "var(" + SEASON_COLOR_VARS[key] + ")";
+  }
+
+  function findVeg(id) {
+    for (var i = 0; i < APP_DATA.vegetables.length; i++) {
+      if (APP_DATA.vegetables[i].id === id) return APP_DATA.vegetables[i];
+    }
+    return null;
+  }
+
+  function vegRowHTML(veg) {
+    var isGrowing = growingSet.has(veg.id);
+    var color = seasonColorVar(veg.seasonKey);
+    return (
+      '<button class="veg-row" type="button" data-open="' + esc(veg.id) + '">' +
+        '<span class="monogram" style="background:' + color + '">' + esc(veg.name.charAt(0)) + '</span>' +
+        '<span class="veg-row-main">' +
+          '<span class="veg-row-name">' + esc(veg.name) +
+            (isGrowing ? '<span class="grow-dot" title="栽培中"></span>' : '') +
+          '</span>' +
+          '<span class="veg-row-sub">' + esc(veg.family) + '｜' + esc(veg.harvest) + '収穫</span>' +
+        '</span>' +
+        '<span class="row-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>' +
+      '</button>'
+    );
+  }
+
+  function renderChips() {
+    var row = document.getElementById("chip-row");
+    var html = '<button class="chip' + (currentFilter === "all" ? " is-active" : "") + '" data-filter="all" type="button">すべて</button>';
+    APP_DATA.seasonKeys.forEach(function (key, i) {
+      html += '<button class="chip' + (currentFilter === key ? " is-active" : "") + '" data-filter="' + key + '" type="button">' + esc(APP_DATA.seasonShort[i]) + '</button>';
+    });
+    row.innerHTML = html;
+    row.querySelectorAll(".chip").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        currentFilter = btn.getAttribute("data-filter");
+        renderChips();
+        renderHomeList();
+      });
+    });
+  }
+
+  function renderHomeList() {
+    var list = APP_DATA.vegetables.filter(function (v) {
+      return currentFilter === "all" || v.seasonKey === currentFilter;
+    });
+    var container = document.getElementById("home-list");
+    container.innerHTML = list.map(vegRowHTML).join("");
+    bindRowOpeners(container);
+  }
+
+  function renderGrowingList() {
+    var container = document.getElementById("growing-list");
+    var list = APP_DATA.vegetables.filter(function (v) { return growingSet.has(v.id); });
+    if (list.length === 0) {
+      container.innerHTML =
+        '<div class="empty-state">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-5 0-8-4-8-9a7 7 0 0 1 7-7c1 3 1 5 1 5s3-1 3-6c4 1 6 4.5 6 8.5 0 5-4 8.5-9 8.5z"/></svg>' +
+          '<p>まだ栽培中の野菜がありません。<br>野菜を選んで「栽培中にする」を押すとここに表示されます。</p>' +
+        '</div>';
+      return;
+    }
+    container.innerHTML = '<p class="section-label">栽培中の野菜（' + list.length + '）</p><div class="veg-list">' + list.map(vegRowHTML).join("") + '</div>';
+    bindRowOpeners(container);
+  }
+
+  function bindRowOpeners(container) {
+    container.querySelectorAll("[data-open]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        openDetail(btn.getAttribute("data-open"));
+      });
+    });
+  }
+
+  function renderTips() {
+    var container = document.getElementById("tips-list");
+    container.innerHTML = APP_DATA.commonTips.map(function (tip, i) {
+      return '<div class="tip-card"><span class="tip-index">' + (i + 1) + '</span><span>' + esc(tip) + '</span></div>';
+    }).join("");
+  }
+
+  var FIELD_LABELS = [
+    ["sow", "種まき・植え付け"],
+    ["harvest", "収穫時期"],
+    ["sun", "日当たり"],
+    ["water", "水やり"],
+    ["pot", "プランター"],
+    ["pests", "主な病害虫"]
+  ];
+
+  function openDetail(id) {
+    var veg = findVeg(id);
+    if (!veg) return;
+    document.getElementById("sheet-name").textContent = veg.name;
+    var familyTag = document.getElementById("sheet-family");
+    familyTag.textContent = veg.family;
+    familyTag.style.background = seasonColorVar(veg.seasonKey);
+
+    var isGrowing = growingSet.has(veg.id);
+    var factsHTML = FIELD_LABELS.map(function (f) {
+      return '<div class="fact-row"><dt>' + f[1] + '</dt><dd>' + esc(veg[f[0]]) + '</dd></div>';
+    }).join("");
+
+    document.getElementById("sheet-body").innerHTML =
+      '<button class="grow-toggle' + (isGrowing ? ' is-growing' : '') + '" id="grow-toggle-btn" type="button">' +
+        '<svg viewBox="0 0 24 24" fill="' + (isGrowing ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-5 0-8-4-8-9a7 7 0 0 1 7-7c1 3 1 5 1 5s3-1 3-6c4 1 6 4.5 6 8.5 0 5-4 8.5-9 8.5z"/></svg>' +
+        '<span>' + (isGrowing ? '栽培中にしています' : '栽培中にする') + '</span>' +
+      '</button>' +
+      '<dl class="fact-grid">' + factsHTML + '</dl>' +
+      '<p class="note-block note-watch"><span class="note-label">観察</span>' + esc(veg.watch) + '</p>' +
+      '<p class="note-block note-offgrade"><span class="note-label">規格外</span>' + esc(veg.offgrade) + '</p>' +
+      '<p class="note-block note-tip"><span class="note-label">コツ</span>' + esc(veg.tips) + '</p>';
+
+    document.getElementById("grow-toggle-btn").addEventListener("click", function () {
+      toggleGrowing(veg.id);
+    });
+
+    document.getElementById("sheet-overlay").classList.add("is-open");
+  }
+
+  function toggleGrowing(id) {
+    if (growingSet.has(id)) {
+      growingSet.delete(id);
+    } else {
+      growingSet.add(id);
+    }
+    saveGrowing(Array.from(growingSet));
+    openDetail(id);
+    renderHomeList();
+    renderGrowingList();
+  }
+
+  function closeDetail() {
+    document.getElementById("sheet-overlay").classList.remove("is-open");
+  }
+
+  document.getElementById("sheet-close").addEventListener("click", closeDetail);
+  document.getElementById("sheet-overlay").addEventListener("click", function (e) {
+    if (e.target === this) closeDetail();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeDetail();
+  });
+
+  var HEADER_TEXT = {
+    home: ["やさい手帳", "季節の野菜を育てよう"],
+    growing: ["栽培中の野菜", "育てている野菜をチェック"],
+    tips: ["共通の栽培のコツ", "どの野菜にも役立つ基本"]
+  };
+
+  document.querySelectorAll(".nav-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      currentNav = btn.getAttribute("data-nav");
+      document.querySelectorAll(".nav-btn").forEach(function (b) { b.classList.remove("is-active"); });
+      btn.classList.add("is-active");
+      document.querySelectorAll(".view").forEach(function (v) {
+        v.classList.toggle("is-active", v.getAttribute("data-view") === currentNav);
+      });
+      document.getElementById("header-title").textContent = HEADER_TEXT[currentNav][0];
+      document.getElementById("header-sub").textContent = HEADER_TEXT[currentNav][1];
+      if (currentNav === "growing") renderGrowingList();
+    });
+  });
+
+  renderChips();
+  renderHomeList();
+  renderGrowingList();
+  renderTips();
+</script>
