@@ -1,5 +1,5 @@
 // キャッシュ内容を変えたら CACHE_NAME を必ず更新すること（バージョンを上げないと利用者に更新が届かない）
-var CACHE_NAME = "yasai-techo-v1";
+var CACHE_NAME = "yasai-techo-v2";
 var ASSETS = [
   "./",
   "./index.html",

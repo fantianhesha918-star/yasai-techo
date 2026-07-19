@@ -491,6 +491,78 @@
   .note-tip { background: rgba(77,122,63,0.1); }
   .note-tip .note-label { color: var(--accent); border: 1px solid var(--accent); }
 
+  /* 成長ステージ チェックリスト */
+  .stage-card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 13px 14px 4px;
+    margin-bottom: 14px;
+  }
+  .stage-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .stage-progress {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    background: rgba(77,122,63,0.12);
+    border-radius: 999px;
+    padding: 2px 9px;
+  }
+  .stage-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 0;
+    border-top: 1px solid var(--line);
+    cursor: pointer;
+  }
+  .stage-item:first-of-type { border-top: none; }
+  .stage-checkbox {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .stage-box {
+    flex: 0 0 auto;
+    width: 20px; height: 20px;
+    margin-top: 1px;
+    border-radius: 6px;
+    border: 1.5px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    color: transparent;
+  }
+  .stage-box svg { width: 13px; height: 13px; }
+  .stage-item.is-done .stage-box {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-contrast);
+  }
+  .stage-checkbox:focus-visible + .stage-box { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .stage-text {
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  .stage-name {
+    display: block;
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+  }
+  .stage-item.is-done .stage-text {
+    color: var(--ink-soft);
+    text-decoration: line-through;
+    text-decoration-color: var(--ink-soft);
+    text-decoration-thickness: 1.5px;
+  }
+  .stage-item.is-done .stage-name { text-decoration: none; }
+
   /* ===== ボトムナビ ===== */
   .bottom-nav {
     flex: 0 0 auto;
@@ -592,7 +664,7 @@
 </div>
 
 <script>
-  var APP_DATA = {"seasonKeys": ["spring-summer", "summer-autumn", "autumn-spring", "year-round"], "seasonShort": ["春夏", "夏秋冬", "秋春", "通年"], "seasonTitles": ["春植え・夏野菜", "夏植え・秋冬野菜", "秋植え・春〜初夏収穫", "通年・複数シーズン育てられる野菜"], "vegetables": [{"name": "トマト", "family": "ナス科", "sow": "種まき2〜3月（育苗）／植え付け4月下旬〜5月", "harvest": "7月〜9月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり。実がなり始めたら水を控えめにすると甘くなる", "pot": "○（大型プランター・支柱必須）", "pests": "疫病、青枯病、アブラムシ", "watch": "下葉の色（黄変していないか）、果実の尻の部分（黒く陥没していないか）、脇芽の伸び具合を数日おきに確認", "offgrade": "尻腐れ果（実の先端が黒く陥没）はカルシウム不足や水切れが原因。傷んだ部分を取り除けば食べられる。裂果（実の割れ）は乾燥後の急な水やりが原因なので早採りしてスープや加熱調理に回す。", "tips": "脇芽はこまめに摘み取り、主枝1本に仕立てると実付きが良くなる。連作を避ける。", "id": "トマト", "daysMin": 60, "daysMax": 80, "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "ナス", "family": "ナス科", "sow": "植え付け5月上旬〜中旬", "harvest": "6月下旬〜10月", "sun": "日当たり良好な場所", "water": "乾燥に弱いので土が乾く前にたっぷり与える", "pot": "○（大型プランター）", "pests": "アブラムシ、ハダニ、ニジュウヤホシテントウ", "watch": "実のツヤ（ツヤがなくなると育ちすぎのサイン）、ヘタのトゲの鋭さ、葉裏のハダニ・アブラムシの有無", "offgrade": "曲がり果や小さい実は水・肥料切れのサインだが味に問題はないので浅漬けや炒め物に。皮が硬い実は収穫遅れなので、早めの収穫を心がける。", "tips": "梅雨明け頃に枝を切り戻す「更新剪定」をすると秋にもう一度収穫できる。", "id": "ナス", "daysMin": 50, "daysMax": 65, "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "キュウリ", "family": "ウリ科", "sow": "植え付け4月下旬〜5月", "harvest": "6月〜8月", "sun": "日当たり良好な場所", "water": "水切れに弱いので朝夕こまめに与える", "pot": "○（ネットや支柱で誘引）", "pests": "うどんこ病、べと病、ウリハムシ", "watch": "葉の白い粉状の斑点（うどんこ病の兆候）、実の太り方、つるの伸びと巻きひげの元気さ", "offgrade": "曲がりキュウリは肥料・水分不足やつる同士の圧迫が原因だが味は変わらないので漬物や炒め物に使える。", "tips": "生育が早いので実は大きくなりすぎる前（開花後7〜10日）に収穫する。", "id": "キュウリ", "daysMin": 40, "daysMax": 55, "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "ピーマン", "family": "ナス科", "sow": "植え付け5月上旬〜中旬", "harvest": "7月〜10月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "○", "pests": "アブラムシ、タバコガ", "watch": "実のツヤと硬さ、ヘタの切り口の変色、着果数と株の疲れ具合", "offgrade": "小さい・変形した実は日照不足や栄養不足のサインだが、味・食感に問題はなく普通に食べられる。", "tips": "最初の実は早めに収穫して株を疲れさせないようにすると、その後の収量が増える。", "id": "ピーマン", "daysMin": 65, "daysMax": 80, "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "オクラ", "family": "アオイ科", "sow": "種まき5月〜6月（直まき可）", "harvest": "7月〜9月", "sun": "日当たり良好な場所", "water": "土が乾いたらたっぷり", "pot": "○", "pests": "アブラムシ、カメムシ", "watch": "実の長さ（5〜7cmが収穫適期）、莢の角の張り具合、収穫忘れの取り残し果がないか", "offgrade": "採り遅れて大きくなった実は筋張って硬くなるが、刻んで加熱調理（煮物・スープ）すれば食べられる。", "tips": "実が育つのが早いので、5〜7cm程度の若いうちにこまめに収穫する。", "id": "オクラ", "daysMin": 55, "daysMax": 70, "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "枝豆", "family": "マメ科", "sow": "種まき5月〜6月", "harvest": "7月下旬〜9月", "sun": "日当たり良好な場所", "water": "開花〜実入り期はとくに水切れに注意", "pot": "○（浅めのプランターでも可）", "pests": "カメムシ、アブラムシ", "watch": "さやの膨らみ具合（ふっくらしてきたら収穫適期）、株の倒伏、カメムシによる吸汁痕", "offgrade": "実入りが不揃いなさやも茹でれば普通に食べられる。カメムシに吸われた豆は変色・変形するが、その部分だけ避ければ問題ない。", "tips": "マメ科は肥料の窒素分が多いと葉ばかり茂るので控えめに。根粒菌が肥料代わりになる。", "id": "枝豆", "daysMin": 75, "daysMax": 95, "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "大根", "family": "アブラナ科", "sow": "種まき8月下旬〜9月", "harvest": "10月〜12月", "sun": "日当たり良好な場所", "water": "発芽までは乾かさない。その後は土の表面が乾いたらたっぷり", "pot": "○（深型プランター）", "pests": "アブラムシ、コナガ、ヨトウムシ", "watch": "地際から見える根の太さ、葉の茂り方、又根の兆候（土の中の石や未熟堆肥の有無）", "offgrade": "又根（根が枝分かれ）は石や未熟な堆肥の塊が原因だが、味・食感は変わらないので家庭で食べる分には問題ない。ひび割れは肥大しすぎ・急な乾湿差が原因なので見つけたら早めに収穫する。", "tips": "間引きを2〜3回に分けて行い、最終的に株間25〜30cmにすると太く育つ。石は事前に取り除く。", "id": "大根", "daysMin": 60, "daysMax": 80, "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "白菜", "family": "アブラナ科", "sow": "種まき・植え付け8月下旬〜9月", "harvest": "11月〜1月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "△（大型プランターなら可）", "pests": "アオムシ、ヨトウムシ", "watch": "結球の締まり具合（手で押して固さを確認）、外葉の食害、内部への虫の侵入痕", "offgrade": "結球が緩い・小さいのは生育期間不足や株間の詰めすぎが原因。固く巻ききらなくても食べられるので鍋物などに早めに使う。", "tips": "結球し始めたら外葉を軽く紐で結ぶと霜よけになり傷みにくい。防虫ネットで虫害を防ぐ。", "id": "白菜", "daysMin": 75, "daysMax": 100, "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "キャベツ", "family": "アブラナ科", "sow": "植え付け8月〜9月（苗から）", "harvest": "11月〜1月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "○（大型プランター）", "pests": "アオムシ、コナガ", "watch": "結球の固さと大きさ、外葉の虫食い穴、頭頂部の裂け（裂球）の兆候", "offgrade": "裂球（結球部の割れ）は肥大しすぎや急な雨による水分吸収が原因。見つけたらすぐ収穫すれば中身の品質に問題はない。", "tips": "植え付け直後から防虫ネットをかけると青虫被害を大きく減らせる。", "id": "キャベツ", "daysMin": 70, "daysMax": 100, "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "ブロッコリー", "family": "アブラナ科", "sow": "植え付け8月下旬〜9月", "harvest": "11月〜1月（頂花蕾）、その後側花蕾も収穫可", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "○", "pests": "アオムシ、アブラムシ", "watch": "蕾（花蕾）の粒の締まり具合、黄色い花が見え始めていないか（開花直前のサイン）", "offgrade": "蕾が緩んで黄色い花が咲きかけたものは急いで収穫。多少味は落ちるが食べられる。側花蕾は頂花蕾より小さいが同様に食用可。", "tips": "頂花蕾を収穫した後も脇から小さな蕾（側花蕾）が次々出るので長く楽しめる。", "id": "ブロッコリー", "daysMin": 80, "daysMax": 110, "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "ほうれん草", "family": "ヒユ科", "sow": "種まき9月〜10月", "harvest": "10月〜12月", "sun": "日当たり〜半日陰でも可", "water": "乾燥させすぎない程度に", "pot": "○（浅型でも可）", "pests": "アブラムシ、べと病", "watch": "葉色（黄ばみは酸性土壌や肥料切れのサイン）、とう立ち（花芽が伸びていないか）", "offgrade": "とう立ちした株は葉や茎が硬くなるが、若い葉の部分は普通に食べられる。葉に多少の虫食いがあっても洗えば問題ない。", "tips": "酸性土壌が苦手なので、種まき前に苦土石灰を混ぜてpH調整すると発芽・生育が良くなる。", "id": "ほうれん草", "daysMin": 30, "daysMax": 45, "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "小松菜", "family": "アブラナ科", "sow": "種まき9月〜10月（周年栽培も可）", "harvest": "種まきから約1カ月", "sun": "日当たり〜半日陰でも可", "water": "土の表面が乾いたらたっぷり", "pot": "○（浅型プランターで手軽）", "pests": "アブラムシ、アオムシ", "watch": "葉の虫食い穴、株の混み具合、葉の大きさ（20cm前後が収穫目安）", "offgrade": "虫食い穴は見た目だけの問題なので、洗って気になる部分を取り除けば食べられる。育ちすぎて葉が硬い株はおひたしなど加熱調理向き。", "tips": "生育が早く初心者向き。株間を混みすぎないよう間引きながら育てると良い。", "id": "小松菜", "daysMin": 25, "daysMax": 35, "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "玉ねぎ", "family": "ヒガンバナ科", "sow": "苗の植え付け11月頃", "harvest": "翌年5月〜6月", "sun": "日当たり良好な場所", "water": "植え付け直後以外は控えめでよい", "pot": "△（大型プランターなら可）", "pests": "べと病、アブラムシ", "watch": "葉の倒伏（7〜8割の葉が倒れたら収穫サイン）、球の肥大、分球（球が2つに割れていないか）", "offgrade": "小玉や分球（2つ玉）は肥料切れや株間の詰めすぎが原因。味は変わらないが日持ちしにくいので早めに使い切る。", "tips": "冬の間に追肥を2回ほど行うと大きな球に育つ。春以降の追肥は病気の原因になるので控える。", "id": "玉ねぎ", "daysMin": 180, "daysMax": 210, "seasonKey": "autumn-spring", "seasonTitle": "秋植え・春〜初夏収穫", "seasonShort": "秋春", "seasonPeriod": "9月〜11月植え付け／翌春〜初夏収穫"}, {"name": "そら豆", "family": "マメ科", "sow": "種まき10月下旬〜11月", "harvest": "翌年5月〜6月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "○", "pests": "アブラムシ（特に春先に多発）", "watch": "さやの向き（下向き→上向きへの変化）、背筋（黒い筋）の色づき、アブラムシの発生状況（新芽の先端を重点チェック）", "offgrade": "実入りが少ない・小さいさやは肥料や水分不足が原因だが味に問題はない。収穫が遅れて背筋が真っ黒になった豆は硬くなるので早めに茹でる。", "tips": "さやが下向きから上向きに変わり、背筋（黒い筋）が出た頃が収穫の目安。", "id": "そら豆", "daysMin": 190, "daysMax": 220, "seasonKey": "autumn-spring", "seasonTitle": "秋植え・春〜初夏収穫", "seasonShort": "秋春", "seasonPeriod": "9月〜11月植え付け／翌春〜初夏収穫"}, {"name": "いちご", "family": "バラ科", "sow": "苗の植え付け9月〜10月", "harvest": "翌年4月〜6月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり、実に水がかからないように", "pot": "○（プランター・鉢に最適）", "pests": "アブラムシ、ナメクジ、灰色かび病", "watch": "花の受粉状況（ミツバチ・風による受粉が十分か）、実の色づき方、地面に接する実の傷み", "offgrade": "変形果（先端が尖る・複数に分かれた多頭果）は受粉不良が主な原因。味は落ちにくいのでジャムやスムージーに加工すると無駄がない。", "tips": "冬の間はマルチや敷きわらで株元を保温し、ランナー（つる状の茎）は早めに切ると実付きが良くなる。", "id": "いちご", "daysMin": 180, "daysMax": 240, "seasonKey": "autumn-spring", "seasonTitle": "秋植え・春〜初夏収穫", "seasonShort": "秋春", "seasonPeriod": "9月〜11月植え付け／翌春〜初夏収穫"}, {"name": "じゃがいも", "family": "ナス科", "sow": "植え付け（種いも）3月（春作）／9月（秋作）", "harvest": "春作6月頃／秋作11〜12月頃", "sun": "日当たり良好な場所", "water": "芽が出るまでは控えめ、その後は土の表面が乾いたらたっぷり", "pot": "○（深型プランター・袋栽培も人気）", "pests": "テントウムシダマシ、疫病", "watch": "いもの緑化（土から顔を出していないか）、葉の茂り具合、掘り上げ前の茎葉の枯れ具合", "offgrade": "緑化したいもの皮にはソラニンという毒素が含まれるため、緑の部分は厚めに取り除いてから食べる。小さいいもは丸ごと素揚げや煮っころがしに使うと無駄がない。", "tips": "芽が伸びてきたら土寄せを2〜3回行うと、いもが増え緑化も防げる。", "id": "じゃがいも", "daysMin": 90, "daysMax": 100, "seasonKey": "year-round", "seasonTitle": "通年・複数シーズン育てられる野菜", "seasonShort": "通年", "seasonPeriod": "季節を選んで年に複数回栽培可能"}, {"name": "レタス", "family": "キク科", "sow": "種まき・植え付け3月〜5月または9月〜10月", "harvest": "種まきから約2カ月", "sun": "日当たり〜半日陰でも可", "water": "土の表面が乾いたらたっぷり", "pot": "○（浅型プランターで手軽）", "pests": "アブラムシ、ナメクジ", "watch": "結球状況（玉レタスの場合）、とう立ちの兆候、外葉のナメクジ食害痕", "offgrade": "とう立ちすると葉に苦みが増すが、外側の葉は普通に利用できる。結球が緩い株も、ちぎって食べるサラダ用には問題なく使える。", "tips": "高温期（真夏）は発芽しにくいので、春・秋の涼しい時期にまくのがコツ。", "id": "レタス", "daysMin": 55, "daysMax": 70, "seasonKey": "year-round", "seasonTitle": "通年・複数シーズン育てられる野菜", "seasonShort": "通年", "seasonPeriod": "季節を選んで年に複数回栽培可能"}], "commonTips": ["水やりは基本的に「土の表面が乾いたら、鉢底から流れ出るくらいたっぷり」が原則。毎日少量よりも効果的。", "同じ科の野菜を同じ場所で連続して育てる「連作」は病気の原因になりやすいため、栽培場所を年ごとにローテーションする。", "プランター栽培では土の量が限られるため、地植えより水切れ・肥料切れが起きやすい。水やりと追肥の頻度を少し多めに。", "苗を植え付けたら、根が土に落ち着くまで（1週間程度）は特にしっかり水を管理する。", "病害虫の多くは早期発見が対策の基本。葉の裏や新芽を定期的にチェックする習慣をつける。"]};
+  var APP_DATA = {"seasonKeys": ["spring-summer", "summer-autumn", "autumn-spring", "year-round"], "seasonShort": ["春夏", "夏秋冬", "秋春", "通年"], "seasonTitles": ["春植え・夏野菜", "夏植え・秋冬野菜", "秋植え・春〜初夏収穫", "通年・複数シーズン育てられる野菜"], "vegetables": [{"name": "トマト", "family": "ナス科", "sow": "種まき2〜3月（育苗）／植え付け4月下旬〜5月", "harvest": "7月〜9月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり。実がなり始めたら水を控えめにすると甘くなる", "pot": "○（大型プランター・支柱必須）", "pests": "疫病、青枯病、アブラムシ", "soil_ph": "pH6.0〜6.5", "watch": "下葉の色（黄変していないか）、果実の尻の部分（黒く陥没していないか）、脇芽の伸び具合を数日おきに確認", "offgrade": "尻腐れ果（実の先端が黒く陥没）はカルシウム不足や水切れが原因。傷んだ部分を取り除けば食べられる。裂果（実の割れ）は乾燥後の急な水やりが原因なので早採りしてスープや加熱調理に回す。", "stages": [{"stage": "植え付け直後", "point": "支柱を立てて茎を軽く8の字に結ぶ。深植えは避け、深さは元の土の高さと揃える。"}, {"stage": "本葉6〜7枚・一番花開花期", "point": "この頃から出てくる脇芽をすべて摘み取り、主枝1本に仕立てる。"}, {"stage": "着果期", "point": "一番果が大きくなり始めたら下葉を整理し、株元の風通しをよくする。"}, {"stage": "収穫期", "point": "ヘタの近くまで色づいたら収穫。早めに採ることで株の負担が減り、次の実付きが良くなる。"}], "daysMin": 60, "daysMax": 80, "tips": "脇芽はこまめに摘み取り、主枝1本に仕立てると実付きが良くなる。連作を避ける。", "id": "トマト", "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "ナス", "family": "ナス科", "sow": "植え付け5月上旬〜中旬", "harvest": "6月下旬〜10月", "sun": "日当たり良好な場所", "water": "乾燥に弱いので土が乾く前にたっぷり与える", "pot": "○（大型プランター）", "pests": "アブラムシ、ハダニ、ニジュウヤホシテントウ", "soil_ph": "pH6.0〜6.5", "watch": "実のツヤ（ツヤがなくなると育ちすぎのサイン）、ヘタのトゲの鋭さ、葉裏のハダニ・アブラムシの有無", "offgrade": "曲がり果や小さい実は水・肥料切れのサインだが味に問題はないので浅漬けや炒め物に。皮が硬い実は収穫遅れなので、早めの収穫を心がける。", "stages": [{"stage": "植え付け直後", "point": "主枝と勢いの良い脇芽2本を残す「3本仕立て」にし、それ以外の脇芽は摘み取る。"}, {"stage": "一番花開花期", "point": "一番花（一番果）は小さいうちに摘み取り、株を先に大きく育てる。"}, {"stage": "収穫最盛期", "point": "採り疲れさせないよう、外側に伸びすぎた枝は適宜切り戻す。"}, {"stage": "梅雨明け", "point": "「更新剪定」で枝を切り戻し、追肥を与えると秋にもう一度収穫できる。"}], "daysMin": 50, "daysMax": 65, "tips": "梅雨明け頃に枝を切り戻す「更新剪定」をすると秋にもう一度収穫できる。", "id": "ナス", "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "キュウリ", "family": "ウリ科", "sow": "植え付け4月下旬〜5月", "harvest": "6月〜8月", "sun": "日当たり良好な場所", "water": "水切れに弱いので朝夕こまめに与える", "pot": "○（ネットや支柱で誘引）", "pests": "うどんこ病、べと病、ウリハムシ", "soil_ph": "pH5.5〜6.5", "watch": "葉の白い粉状の斑点（うどんこ病の兆候）、実の太り方、つるの伸びと巻きひげの元気さ", "offgrade": "曲がりキュウリは肥料・水分不足やつる同士の圧迫が原因だが味は変わらないので漬物や炒め物に使える。", "stages": [{"stage": "植え付け直後", "point": "地面から5節目くらいまでの子づる・雌花はすべて摘み取り、主枝を育てる。"}, {"stage": "つるが伸びてきたら", "point": "ネットや支柱に誘引し、巻きひげが絡まりすぎないよう整える。"}, {"stage": "収穫初期", "point": "一番果は早めに小さいうちに収穫し、その後の実付きを促す。"}, {"stage": "収穫最盛期", "point": "開花後7〜10日を目安にこまめに採る。採り遅れると次の実の生育が遅くなる。"}], "daysMin": 40, "daysMax": 55, "tips": "生育が早いので実は大きくなりすぎる前（開花後7〜10日）に収穫する。", "id": "キュウリ", "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "ピーマン", "family": "ナス科", "sow": "植え付け5月上旬〜中旬", "harvest": "7月〜10月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "○", "pests": "アブラムシ、タバコガ", "soil_ph": "pH6.0〜6.5", "watch": "実のツヤと硬さ、ヘタの切り口の変色、着果数と株の疲れ具合", "offgrade": "小さい・変形した実は日照不足や栄養不足のサインだが、味・食感に問題はなく普通に食べられる。", "stages": [{"stage": "植え付け直後", "point": "一番花のすぐ下から出る脇芽まで、それより下の脇芽はすべて摘み取る。"}, {"stage": "一番花開花期", "point": "一番花（一番果）は早めに収穫し、株を先に育てる。"}, {"stage": "収穫期", "point": "実がなり続けるので、こまめな収穫が次の着果を促す。"}, {"stage": "盛夏", "point": "葉が茂りすぎたら古い葉を整理し、風通しと日当たりを確保する。"}], "daysMin": 65, "daysMax": 80, "tips": "最初の実は早めに収穫して株を疲れさせないようにすると、その後の収量が増える。", "id": "ピーマン", "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "オクラ", "family": "アオイ科", "sow": "種まき5月〜6月（直まき可）", "harvest": "7月〜9月", "sun": "日当たり良好な場所", "water": "土が乾いたらたっぷり", "pot": "○", "pests": "アブラムシ、カメムシ", "soil_ph": "pH6.0〜6.5", "watch": "実の長さ（5〜7cmが収穫適期）、莢の角の張り具合、収穫忘れの取り残し果がないか", "offgrade": "採り遅れて大きくなった実は筋張って硬くなるが、刻んで加熱調理（煮物・スープ）すれば食べられる。", "stages": [{"stage": "発芽・間引き期", "point": "本葉が出たら生育の良い1本を残して間引く。"}, {"stage": "生育中期", "point": "下の葉が黄色くなったら随時取り除き、株元の風通しを良くする。"}, {"stage": "開花後", "point": "花が咲いた翌日〜2日後から実が急速に育つので、位置を確認しておく。"}, {"stage": "収穫期", "point": "5〜7cmを超える前にこまめに収穫し、採り遅れを防ぐ。"}], "daysMin": 55, "daysMax": 70, "tips": "実が育つのが早いので、5〜7cm程度の若いうちにこまめに収穫する。", "id": "オクラ", "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "枝豆", "family": "マメ科", "sow": "種まき5月〜6月", "harvest": "7月下旬〜9月", "sun": "日当たり良好な場所", "water": "開花〜実入り期はとくに水切れに注意", "pot": "○（浅めのプランターでも可）", "pests": "カメムシ、アブラムシ", "soil_ph": "pH6.0〜6.5", "watch": "さやの膨らみ具合（ふっくらしてきたら収穫適期）、株の倒伏、カメムシによる吸汁痕", "offgrade": "実入りが不揃いなさやも茹でれば普通に食べられる。カメムシに吸われた豆は変色・変形するが、その部分だけ避ければ問題ない。", "stages": [{"stage": "種まき後", "point": "本葉1〜2枚で間引き、1か所1本にする。"}, {"stage": "本葉5〜6枚", "point": "摘心（先端を摘む）すると枝分かれが増え、さやの数が増える。"}, {"stage": "開花期", "point": "水切れするとさやの付きが悪くなるので水やりを欠かさない。"}, {"stage": "収穫期", "point": "さやが膨らみ、振っても音がしない（実が詰まっている）うちに収穫する。"}], "daysMin": 75, "daysMax": 95, "tips": "マメ科は肥料の窒素分が多いと葉ばかり茂るので控えめに。根粒菌が肥料代わりになる。", "id": "枝豆", "seasonKey": "spring-summer", "seasonTitle": "春植え・夏野菜", "seasonShort": "春夏", "seasonPeriod": "3月〜5月植え付け／6月〜9月収穫"}, {"name": "大根", "family": "アブラナ科", "sow": "種まき8月下旬〜9月", "harvest": "10月〜12月", "sun": "日当たり良好な場所", "water": "発芽までは乾かさない。その後は土の表面が乾いたらたっぷり", "pot": "○（深型プランター）", "pests": "アブラムシ、コナガ、ヨトウムシ", "soil_ph": "pH5.5〜6.5", "watch": "地際から見える根の太さ、葉の茂り方、又根の兆候（土の中の石や未熟堆肥の有無）", "offgrade": "又根（根が枝分かれ）は石や未熟な堆肥の塊が原因だが、味・食感は変わらないので家庭で食べる分には問題ない。ひび割れは肥大しすぎ・急な乾湿差が原因なので見つけたら早めに収穫する。", "stages": [{"stage": "種まき後", "point": "本葉が出たら生育の良い株を残し、2〜3回に分けて間引く。"}, {"stage": "間引き完了後", "point": "最終株間25〜30cmを確保し、太らせるスペースを作る。"}, {"stage": "生育中期", "point": "根の肩が地上に見えてきたら、割れ防止のため土寄せする。"}, {"stage": "収穫期", "point": "葉が横に広がってきたら収穫の合図。太りすぎる前に抜き取る。"}], "daysMin": 60, "daysMax": 80, "tips": "間引きを2〜3回に分けて行い、最終的に株間25〜30cmにすると太く育つ。石は事前に取り除く。", "id": "大根", "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "白菜", "family": "アブラナ科", "sow": "種まき・植え付け8月下旬〜9月", "harvest": "11月〜1月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "△（大型プランターなら可）", "pests": "アオムシ、ヨトウムシ", "soil_ph": "pH6.0〜6.5", "watch": "結球の締まり具合（手で押して固さを確認）、外葉の食害、内部への虫の侵入痕", "offgrade": "結球が緩い・小さいのは生育期間不足や株間の詰めすぎが原因。固く巻ききらなくても食べられるので鍋物などに早めに使う。", "stages": [{"stage": "植え付け直後", "point": "防虫ネットをすぐにかけ、アオムシ・ヨトウムシの食害を防ぐ。"}, {"stage": "生育中期", "point": "外葉が20枚程度に育ったら結球が始まる合図。"}, {"stage": "結球開始後", "point": "追肥を済ませておき、以降は肥料を控えて病気を防ぐ。"}, {"stage": "収穫前", "point": "結球の頭を軽く押して固さを確認。しっかり固ければ収穫適期。"}], "daysMin": 75, "daysMax": 100, "tips": "結球し始めたら外葉を軽く紐で結ぶと霜よけになり傷みにくい。防虫ネットで虫害を防ぐ。", "id": "白菜", "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "キャベツ", "family": "アブラナ科", "sow": "植え付け8月〜9月（苗から）", "harvest": "11月〜1月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "○（大型プランター）", "pests": "アオムシ、コナガ", "soil_ph": "pH6.0〜6.5", "watch": "結球の固さと大きさ、外葉の虫食い穴、頭頂部の裂け（裂球）の兆候", "offgrade": "裂球（結球部の割れ）は肥大しすぎや急な雨による水分吸収が原因。見つけたらすぐ収穫すれば中身の品質に問題はない。", "stages": [{"stage": "植え付け直後", "point": "防虫ネットをかけて青虫の食害を予防する。"}, {"stage": "生育中期", "point": "外葉が15枚前後になると結球が始まる。"}, {"stage": "結球中", "point": "頭を上から押して固さを確認し、裂球しそうな株から先に収穫する。"}, {"stage": "収穫期", "point": "球がしっかり締まったら収穫。切り口をそのままにすると傷みやすいので早めに使う。"}], "daysMin": 70, "daysMax": 100, "tips": "植え付け直後から防虫ネットをかけると青虫被害を大きく減らせる。", "id": "キャベツ", "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "ブロッコリー", "family": "アブラナ科", "sow": "植え付け8月下旬〜9月", "harvest": "11月〜1月（頂花蕾）、その後側花蕾も収穫可", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "○", "pests": "アオムシ、アブラムシ", "soil_ph": "pH6.0〜6.5", "watch": "蕾（花蕾）の粒の締まり具合、黄色い花が見え始めていないか（開花直前のサイン）", "offgrade": "蕾が緩んで黄色い花が咲きかけたものは急いで収穫。多少味は落ちるが食べられる。側花蕾は頂花蕾より小さいが同様に食用可。", "stages": [{"stage": "植え付け直後", "point": "防虫ネットで初期の食害を防ぐ。"}, {"stage": "生育中期", "point": "葉が10枚以上に育つと頂花蕾ができ始める。"}, {"stage": "頂花蕾収穫後", "point": "脇から出る側花蕾を育てるため、追肥を行う。"}, {"stage": "収穫期", "point": "蕾の粒がまだ小さく締まっているうちに収穫し、黄色い花が見え始めたら急いで採る。"}], "daysMin": 80, "daysMax": 110, "tips": "頂花蕾を収穫した後も脇から小さな蕾（側花蕾）が次々出るので長く楽しめる。", "id": "ブロッコリー", "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "ほうれん草", "family": "ヒユ科", "sow": "種まき9月〜10月", "harvest": "10月〜12月", "sun": "日当たり〜半日陰でも可", "water": "乾燥させすぎない程度に", "pot": "○（浅型でも可）", "pests": "アブラムシ、べと病", "soil_ph": "pH6.5〜7.0（酸性を嫌う）", "watch": "葉色（黄ばみは酸性土壌や肥料切れのサイン）、とう立ち（花芽が伸びていないか）", "offgrade": "とう立ちした株は葉や茎が硬くなるが、若い葉の部分は普通に食べられる。葉に多少の虫食いがあっても洗えば問題ない。", "stages": [{"stage": "種まき前", "point": "酸性土壌を嫌うため、苦土石灰を混ぜてpHを6.5前後に調整しておく。"}, {"stage": "発芽後", "point": "本葉1〜2枚で混み合った部分を間引く。"}, {"stage": "生育中期", "point": "本葉4〜5枚でさらに間引き、株間を3〜4cmにする。"}, {"stage": "収穫期", "point": "草丈20〜25cmが目安。とう立ち前に早めに収穫する。"}], "daysMin": 30, "daysMax": 45, "tips": "酸性土壌が苦手なので、種まき前に苦土石灰を混ぜてpH調整すると発芽・生育が良くなる。", "id": "ほうれん草", "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "小松菜", "family": "アブラナ科", "sow": "種まき9月〜10月（周年栽培も可）", "harvest": "種まきから約1カ月", "sun": "日当たり〜半日陰でも可", "water": "土の表面が乾いたらたっぷり", "pot": "○（浅型プランターで手軽）", "pests": "アブラムシ、アオムシ", "soil_ph": "pH6.0〜6.5", "watch": "葉の虫食い穴、株の混み具合、葉の大きさ（20cm前後が収穫目安）", "offgrade": "虫食い穴は見た目だけの問題なので、洗って気になる部分を取り除けば食べられる。育ちすぎて葉が硬い株はおひたしなど加熱調理向き。", "stages": [{"stage": "種まき後", "point": "発芽が揃ったら本葉1〜2枚で間引きを開始する。"}, {"stage": "生育中期", "point": "株間3〜5cmを目安にさらに間引く。"}, {"stage": "収穫期", "point": "草丈20cm前後で根元から収穫する。"}, {"stage": "収穫後", "point": "一度に採りきらず、大きくなった株から順に収穫すると長く楽しめる。"}], "daysMin": 25, "daysMax": 35, "tips": "生育が早く初心者向き。株間を混みすぎないよう間引きながら育てると良い。", "id": "小松菜", "seasonKey": "summer-autumn", "seasonTitle": "夏植え・秋冬野菜", "seasonShort": "夏秋冬", "seasonPeriod": "8月〜9月植え付け／10月〜1月収穫"}, {"name": "玉ねぎ", "family": "ヒガンバナ科", "sow": "苗の植え付け11月頃", "harvest": "翌年5月〜6月", "sun": "日当たり良好な場所", "water": "植え付け直後以外は控えめでよい", "pot": "△（大型プランターなら可）", "pests": "べと病、アブラムシ", "soil_ph": "pH6.0〜6.5", "watch": "葉の倒伏（7〜8割の葉が倒れたら収穫サイン）、球の肥大、分球（球が2つに割れていないか）", "offgrade": "小玉や分球（2つ玉）は肥料切れや株間の詰めすぎが原因。味は変わらないが日持ちしにくいので早めに使い切る。", "stages": [{"stage": "植え付け直後", "point": "苗はマルチの穴に対して浅植えにし、根が浮かないよう軽く押さえる。"}, {"stage": "冬の間", "point": "12月と2月頃の2回、追肥を行い球の肥大を促す。"}, {"stage": "春以降", "point": "追肥は病気の原因になるので打ち切る。"}, {"stage": "収穫期", "point": "葉の7〜8割が倒れたら収穫の合図。晴天が続く日を選んで掘り上げる。"}], "daysMin": 180, "daysMax": 210, "tips": "冬の間に追肥を2回ほど行うと大きな球に育つ。春以降の追肥は病気の原因になるので控える。", "id": "玉ねぎ", "seasonKey": "autumn-spring", "seasonTitle": "秋植え・春〜初夏収穫", "seasonShort": "秋春", "seasonPeriod": "9月〜11月植え付け／翌春〜初夏収穫"}, {"name": "そら豆", "family": "マメ科", "sow": "種まき10月下旬〜11月", "harvest": "翌年5月〜6月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり", "pot": "○", "pests": "アブラムシ（特に春先に多発）", "soil_ph": "pH6.5〜7.0（酸性を嫌う）", "watch": "さやの向き（下向き→上向きへの変化）、背筋（黒い筋）の色づき、アブラムシの発生状況（新芽の先端を重点チェック）", "offgrade": "実入りが少ない・小さいさやは肥料や水分不足が原因だが味に問題はない。収穫が遅れて背筋が真っ黒になった豆は硬くなるので早めに茹でる。", "stages": [{"stage": "植え付け直後", "point": "寒さに当てすぎないよう、株元をマルチや敷きわらで保護する。"}, {"stage": "冬越し後・生育再開", "point": "草丈が伸びてきたら1株5〜6本に整枝し、それ以外の枝は摘み取る。"}, {"stage": "開花期", "point": "アブラムシが付きやすいので新芽の先端を重点的にチェックする。"}, {"stage": "収穫期", "point": "さやが下向きから上向きに変わり、背筋が黒く色づいたら収穫適期。"}], "daysMin": 190, "daysMax": 220, "tips": "さやが下向きから上向きに変わり、背筋（黒い筋）が出た頃が収穫の目安。", "id": "そら豆", "seasonKey": "autumn-spring", "seasonTitle": "秋植え・春〜初夏収穫", "seasonShort": "秋春", "seasonPeriod": "9月〜11月植え付け／翌春〜初夏収穫"}, {"name": "いちご", "family": "バラ科", "sow": "苗の植え付け9月〜10月", "harvest": "翌年4月〜6月", "sun": "日当たり良好な場所", "water": "土の表面が乾いたらたっぷり、実に水がかからないように", "pot": "○（プランター・鉢に最適）", "pests": "アブラムシ、ナメクジ、灰色かび病", "soil_ph": "pH5.5〜6.5", "watch": "花の受粉状況（ミツバチ・風による受粉が十分か）、実の色づき方、地面に接する実の傷み", "offgrade": "変形果（先端が尖る・複数に分かれた多頭果）は受粉不良が主な原因。味は落ちにくいのでジャムやスムージーに加工すると無駄がない。", "stages": [{"stage": "植え付け直後", "point": "クラウン（株の中心）を土に埋めないよう浅植えにする。"}, {"stage": "冬の間", "point": "マルチや敷きわらで株元を保温し、霜による傷みを防ぐ。"}, {"stage": "開花期", "point": "花の中心を軽く筆でなでると受粉が助けられ、実付きが良くなる。"}, {"stage": "収穫期", "point": "ヘタの近くまで赤く色づいたら収穫。地面に触れる実はワラなどで持ち上げて傷みを防ぐ。"}], "daysMin": 180, "daysMax": 240, "tips": "冬の間はマルチや敷きわらで株元を保温し、ランナー（つる状の茎）は早めに切ると実付きが良くなる。", "id": "いちご", "seasonKey": "autumn-spring", "seasonTitle": "秋植え・春〜初夏収穫", "seasonShort": "秋春", "seasonPeriod": "9月〜11月植え付け／翌春〜初夏収穫"}, {"name": "じゃがいも", "family": "ナス科", "sow": "植え付け（種いも）3月（春作）／9月（秋作）", "harvest": "春作6月頃／秋作11〜12月頃", "sun": "日当たり良好な場所", "water": "芽が出るまでは控えめ、その後は土の表面が乾いたらたっぷり", "pot": "○（深型プランター・袋栽培も人気）", "pests": "テントウムシダマシ、疫病", "soil_ph": "pH5.0〜6.0（やや酸性を好む）", "watch": "いもの緑化（土から顔を出していないか）、葉の茂り具合、掘り上げ前の茎葉の枯れ具合", "offgrade": "緑化したいもの皮にはソラニンという毒素が含まれるため、緑の部分は厚めに取り除いてから食べる。小さいいもは丸ごと素揚げや煮っころがしに使うと無駄がない。", "stages": [{"stage": "植え付け直前", "point": "種いもの切り口を1〜2日乾かしてから植えると腐りにくい。"}, {"stage": "芽が出たら", "point": "生育の良い芽を2〜3本残し、それ以外の芽は間引く（芽かき）。"}, {"stage": "芽かき後", "point": "土寄せを2〜3回行い、いもが地表に出て緑化するのを防ぐ。"}, {"stage": "収穫期", "point": "地上部の葉が黄色く枯れてきたら収穫の合図。晴天が続いた日に掘り上げる。"}], "daysMin": 90, "daysMax": 100, "tips": "芽が伸びてきたら土寄せを2〜3回行うと、いもが増え緑化も防げる。", "id": "じゃがいも", "seasonKey": "year-round", "seasonTitle": "通年・複数シーズン育てられる野菜", "seasonShort": "通年", "seasonPeriod": "季節を選んで年に複数回栽培可能"}, {"name": "レタス", "family": "キク科", "sow": "種まき・植え付け3月〜5月または9月〜10月", "harvest": "種まきから約2カ月", "sun": "日当たり〜半日陰でも可", "water": "土の表面が乾いたらたっぷり", "pot": "○（浅型プランターで手軽）", "pests": "アブラムシ、ナメクジ", "soil_ph": "pH6.0〜6.5", "watch": "結球状況（玉レタスの場合）、とう立ちの兆候、外葉のナメクジ食害痕", "offgrade": "とう立ちすると葉に苦みが増すが、外側の葉は普通に利用できる。結球が緩い株も、ちぎって食べるサラダ用には問題なく使える。", "stages": [{"stage": "種まき後", "point": "レタスの種は好光性のため覆土は薄くする。"}, {"stage": "発芽後", "point": "本葉2〜3枚で間引き、生育の良い株を残す。"}, {"stage": "生育中期", "point": "株間を25〜30cm確保し、結球するスペースを作る。"}, {"stage": "収穫期", "point": "結球レタスは頭を軽く押して固さを確認。玉にならない品種は外葉からのかき取り収穫も可能。"}], "daysMin": 55, "daysMax": 70, "tips": "高温期（真夏）は発芽しにくいので、春・秋の涼しい時期にまくのがコツ。", "id": "レタス", "seasonKey": "year-round", "seasonTitle": "通年・複数シーズン育てられる野菜", "seasonShort": "通年", "seasonPeriod": "季節を選んで年に複数回栽培可能"}], "commonTips": ["水やりは基本的に「土の表面が乾いたら、鉢底から流れ出るくらいたっぷり」が原則。毎日少量よりも効果的。", "同じ科の野菜を同じ場所で連続して育てる「連作」は病気の原因になりやすいため、栽培場所を年ごとにローテーションする。", "プランター栽培では土の量が限られるため、地植えより水切れ・肥料切れが起きやすい。水やりと追肥の頻度を少し多めに。", "苗を植え付けたら、根が土に落ち着くまで（1週間程度）は特にしっかり水を管理する。", "病害虫の多くは早期発見が対策の基本。葉の裏や新芽を定期的にチェックする習慣をつける。"]};
 
   var SEASON_COLOR_VARS = {
     "spring-summer": "--season-spring-summer",
@@ -624,7 +696,27 @@
     } catch (e) {}
   }
 
+  var STAGE_STORAGE_KEY = "yasai-techo-stages-v1";
+
+  function loadStageChecks() {
+    try {
+      var raw = localStorage.getItem(STAGE_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+  function saveStageChecks(list) {
+    try {
+      localStorage.setItem(STAGE_STORAGE_KEY, JSON.stringify(list));
+    } catch (e) {}
+  }
+  function stageKey(vegId, idx) {
+    return vegId + "::" + idx;
+  }
+
   var growingData = loadGrowingData();
+  var stageCheckSet = new Set(loadStageChecks());
   var currentFilter = "all";
   var currentSearch = "";
   var currentNav = "home";
@@ -753,9 +845,38 @@
     ["harvest", "収穫時期"],
     ["sun", "日当たり"],
     ["water", "水やり"],
+    ["soil_ph", "土の最適pH"],
     ["pot", "プランター"],
     ["pests", "主な病害虫"]
   ];
+
+  function stageDoneCount(veg) {
+    return veg.stages.filter(function (s, i) { return stageCheckSet.has(stageKey(veg.id, i)); }).length;
+  }
+
+  function stagesHTML(veg) {
+    if (!veg.stages || veg.stages.length === 0) return "";
+    var items = veg.stages.map(function (s, i) {
+      var key = stageKey(veg.id, i);
+      var done = stageCheckSet.has(key);
+      return (
+        '<label class="stage-item' + (done ? ' is-done' : '') + '" data-stage-key="' + esc(key) + '">' +
+          '<input type="checkbox" class="stage-checkbox"' + (done ? ' checked' : '') + ' />' +
+          '<span class="stage-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>' +
+          '<span class="stage-text"><span class="stage-name">' + esc(s.stage) + '</span>' + esc(s.point) + '</span>' +
+        '</label>'
+      );
+    }).join("");
+    return (
+      '<div class="stage-card">' +
+        '<div class="stage-card-head">' +
+          '<span class="section-label" style="margin:0;">成長ステージのポイント</span>' +
+          '<span class="stage-progress" id="stage-progress">' + stageDoneCount(veg) + ' / ' + veg.stages.length + '</span>' +
+        '</div>' +
+        items +
+      '</div>'
+    );
+  }
 
   function openDetail(id) {
     var veg = findVeg(id);
@@ -790,6 +911,7 @@
       '</button>' +
       plantedBlockHTML +
       '<dl class="fact-grid">' + factsHTML + '</dl>' +
+      stagesHTML(veg) +
       '<p class="note-block note-watch"><span class="note-label">観察</span>' + esc(veg.watch) + '</p>' +
       '<p class="note-block note-offgrade"><span class="note-label">規格外</span>' + esc(veg.offgrade) + '</p>' +
       '<p class="note-block note-tip"><span class="note-label">コツ</span>' + esc(veg.tips) + '</p>';
@@ -805,6 +927,23 @@
         renderGrowingList();
       });
     }
+
+    document.getElementById("sheet-body").querySelectorAll(".stage-item").forEach(function (label) {
+      var checkbox = label.querySelector(".stage-checkbox");
+      checkbox.addEventListener("change", function () {
+        var key = label.getAttribute("data-stage-key");
+        if (checkbox.checked) {
+          stageCheckSet.add(key);
+          label.classList.add("is-done");
+        } else {
+          stageCheckSet.delete(key);
+          label.classList.remove("is-done");
+        }
+        saveStageChecks(Array.from(stageCheckSet));
+        var progressEl = document.getElementById("stage-progress");
+        if (progressEl) progressEl.textContent = stageDoneCount(veg) + " / " + veg.stages.length;
+      });
+    });
 
     document.getElementById("sheet-overlay").classList.add("is-open");
   }
