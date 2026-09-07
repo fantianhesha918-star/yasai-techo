@@ -494,7 +494,12 @@
     margin-bottom: 16px;
   }
   .empty-illust .empty-ic { width: 44px; height: 44px; color: var(--accent); }
-  .empty-img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
+  .empty-illust:has(.empty-img) {
+    width: 168px; height: 168px;
+    border-radius: var(--r-lg);
+    background: var(--card-bg);
+  }
+  .empty-img { width: 100%; height: 100%; object-fit: contain; border-radius: inherit; }
   .empty-title { font-family: var(--font-head); font-weight: 700; color: var(--ink); margin: 0 0 4px; }
   .empty-sub { margin: 0; line-height: 1.7; max-width: 22em; }
   .empty-cta {
@@ -505,6 +510,27 @@
     cursor: pointer; -webkit-appearance: none; appearance: none;
   }
   .empty-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .home-hero {
+    display: block;
+    width: 100%;
+    height: 116px;
+    object-fit: cover;
+    object-position: center 80%;
+    border-radius: var(--r-md);
+    margin-bottom: 14px;
+    border: 1px solid var(--line);
+  }
+  .yk-hero {
+    display: block;
+    width: 100%;
+    height: 92px;
+    object-fit: cover;
+    object-position: center 58%;
+    border-radius: var(--r-md);
+    margin-bottom: 12px;
+    border: 1px solid var(--line);
+  }
 
   .section-label {
     font-family: var(--font-head);
@@ -1487,6 +1513,7 @@
 
     <!-- ホーム -->
     <section class="view is-active" data-view="home">
+      <img class="home-hero" src="illust-home-hero.png" alt="" />
       <div id="home-care"></div>
       <div class="search-row">
         <input type="search" id="veg-search" class="search-input" placeholder="野菜名で検索" autocomplete="off" />
@@ -1511,6 +1538,7 @@
 
     <!-- 薬膳 -->
     <section class="view" data-view="yakuzen">
+      <img class="yk-hero" src="illust-yakuzen-banner.png" alt="" />
       <div id="yakuzen-banner" class="yk-banner"></div>
       <div id="yakuzen-shun" class="yk-shun"></div>
       <p class="section-label yk-guide-hd">薬膳の基礎知識（タップで開く）</p>
@@ -1956,9 +1984,9 @@
   // 空状態の挿絵スロット：後日ChatGPT/Geminiで作ったPNGを同フォルダに置き、
   // ここにファイル名を入れると線アイコンから画像に切り替わる。
   var EMPTY_ILLUST = {
-    growing: null,   // 例: "illust-empty-growing.png"
-    search: null,    // 例: "illust-empty-search.png"
-    yakuzen: null
+    growing: "illust-empty-growing.png",
+    search: "illust-empty-search.png",
+    yakuzen: "illust-empty-yakuzen.png"
   };
   function emptyStateHTML(o) {
     var slot = EMPTY_ILLUST[o.key]
