@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <title>やさい手帳</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#4d7a3f" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -558,6 +558,9 @@
   .note-offgrade .note-label { color: var(--offgrade-ink); border: 1px solid var(--offgrade-ink); }
   .note-tip { background: rgba(77,122,63,0.1); }
   .note-tip .note-label { color: var(--accent); border: 1px solid var(--accent); }
+  .note-yakuzen { background: rgba(124,106,158,0.12); }
+  .note-yakuzen .note-label { color: var(--season-year-round); border: 1px solid var(--season-year-round); }
+  .yakuzen-line-hint { display: block; margin-top: 4px; font-size: 0.72rem; color: var(--ink-soft); }
 
   /* 成長ステージ チェックリスト */
   .stage-card {
@@ -1126,11 +1129,35 @@
   var currentSearch = "";
   var currentNav = "home";
   var currentConcern = "all";
+  var lastSheetTrigger = null;
 
   function esc(s) {
     var div = document.createElement("div");
     div.textContent = s;
     return div.innerHTML;
+  }
+
+  // カタカナ→ひらがな（検索のかな照合用）
+  function toHira(s) {
+    return (s || "").replace(/[ァ-ヶ]/g, function (c) {
+      return String.fromCharCode(c.charCodeAt(0) - 0x60);
+    });
+  }
+  // 漢字を含む野菜名の読み（かな検索のため）。カタカナ・ひらがな名は toHira で拾える。
+  var VEG_READING = {
+    "枝豆": "えだまめ", "そら豆": "そらまめ", "里芋": "さといも", "生姜": "しょうが",
+    "大根": "だいこん", "白菜": "はくさい", "春菊": "しゅんぎく", "水菜": "みずな",
+    "玉ねぎ": "たまねぎ", "長ネギ": "ながねぎ", "大葉": "おおばあおじそしそ", "空心菜": "くうしんさい",
+    "落花生": "らっかせいぴーなっつ", "芽キャベツ": "めきゃべつ", "小松菜": "こまつな",
+    "じゃがいも": "じゃがいもばれいしょ"
+  };
+  function vegMatchesQuery(v, q) {
+    if (!q) return true;
+    var hq = toHira(q);
+    if (toHira(v.name).indexOf(hq) !== -1) return true;
+    if (VEG_READING[v.id] && VEG_READING[v.id].indexOf(hq) !== -1) return true;
+    if (toHira(v.family).indexOf(hq) !== -1) return true;
+    return false;
   }
 
   function seasonColorVar(key) {
@@ -1270,8 +1297,7 @@
     renderMonthPanel();
     var list = APP_DATA.vegetables.filter(function (v) {
       var matchesFilter = currentFilter === "all" || v.seasonKey === currentFilter;
-      var matchesSearch = !currentSearch || v.name.indexOf(currentSearch) !== -1;
-      return matchesFilter && matchesSearch;
+      return matchesFilter && vegMatchesQuery(v, currentSearch);
     });
     var container = document.getElementById("home-list");
     if (list.length === 0) {
@@ -1505,9 +1531,25 @@
     }
   }
 
+  function findYakuzenForVeg(veg) {
+    var hn = toHira(veg.name);
+    for (var i = 0; i < YAKUZEN.length; i++) {
+      if (toHira(YAKUZEN[i].name).indexOf(hn) === 0) return YAKUZEN[i];
+    }
+    return null;
+  }
+  function vegYakuzenLineHTML(veg) {
+    var yk = findYakuzenForVeg(veg);
+    if (!yk) return "";
+    return '<p class="note-block note-yakuzen"><span class="note-label">薬膳</span>五性 ' +
+      esc(yk.sei) + '（' + esc(seiDesc(yk.sei)) + '）｜' + esc(yk.kou) +
+      '<span class="yakuzen-line-hint">くわしくは薬膳タブ</span></p>';
+  }
+
   function openDetail(id) {
     var veg = findVeg(id);
     if (!veg) return;
+    lastSheetTrigger = document.activeElement;
     document.getElementById("sheet-name").textContent = veg.name;
     var familyTag = document.getElementById("sheet-family");
     familyTag.textContent = veg.family;
@@ -1546,7 +1588,8 @@
       stagesHTML(veg) +
       '<p class="note-block note-watch"><span class="note-label">観察</span>' + esc(veg.watch) + '</p>' +
       '<p class="note-block note-offgrade"><span class="note-label">規格外</span>' + esc(veg.offgrade) + '</p>' +
-      '<p class="note-block note-tip"><span class="note-label">コツ</span>' + esc(veg.tips) + '</p>';
+      '<p class="note-block note-tip"><span class="note-label">コツ</span>' + esc(veg.tips) + '</p>' +
+      vegYakuzenLineHTML(veg);
 
     document.getElementById("grow-toggle-btn").addEventListener("click", function () {
       toggleGrowing(veg.id);
@@ -1580,6 +1623,12 @@
     bindRecordForms(veg.id);
 
     document.getElementById("sheet-overlay").classList.add("is-open");
+    focusSheet();
+  }
+
+  function focusSheet() {
+    var c = document.getElementById("sheet-close");
+    if (c) { try { c.focus(); } catch (e) {} }
   }
 
   function toggleGrowing(id) {
@@ -1601,7 +1650,13 @@
   }
 
   function closeDetail() {
-    document.getElementById("sheet-overlay").classList.remove("is-open");
+    var overlay = document.getElementById("sheet-overlay");
+    if (!overlay.classList.contains("is-open")) return;
+    overlay.classList.remove("is-open");
+    if (lastSheetTrigger && lastSheetTrigger.focus) {
+      try { lastSheetTrigger.focus(); } catch (e) {}
+    }
+    lastSheetTrigger = null;
   }
 
   document.getElementById("veg-search").addEventListener("input", function (e) {
@@ -1796,6 +1851,7 @@
       if (YAKUZEN[i].name === name) { f = YAKUZEN[i]; break; }
     }
     if (!f) return;
+    lastSheetTrigger = document.activeElement;
     document.getElementById("sheet-name").textContent = f.name;
     var tag = document.getElementById("sheet-family");
     tag.textContent = f.cat;
@@ -1814,6 +1870,7 @@
         : '') +
       '<p class="yk-disclaimer">' + esc(YK_DISCLAIMER) + '</p>';
     document.getElementById("sheet-overlay").classList.add("is-open");
+    focusSheet();
   }
 
   var HEADER_TEXT = {
