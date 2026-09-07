@@ -1190,6 +1190,31 @@
     padding: 1px 8px;
     margin-left: auto;
   }
+  .mp-nav {
+    flex: 0 0 auto;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--app-bg);
+    color: var(--ink-soft);
+    font-size: 1rem; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-family: inherit;
+    -webkit-appearance: none; appearance: none;
+  }
+  .mp-nav:active { transform: scale(0.9); }
+  .mp-title { font-family: var(--font-head); }
+  .mp-today {
+    font: inherit; font-size: 0.76rem; font-weight: 700;
+    color: var(--accent);
+    background: var(--grow-soft);
+    border: 0; border-radius: var(--r-pill);
+    padding: 4px 12px; margin-bottom: 10px;
+    cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+  }
+  .mp-empty { font-size: 0.82rem; color: var(--ink-soft); margin: 4px 0 0; }
   .month-panel-body { padding: 2px 15px 14px; }
   .month-group + .month-group { margin-top: 10px; }
   .month-group-label {
@@ -2102,17 +2127,21 @@
     });
   }
 
+  var monthPanelMonth = new Date().getMonth() + 1;
+
   function renderMonthPanel() {
     var panel = document.getElementById("month-panel");
     if (currentSearch) { panel.innerHTML = ""; return; }
-    var m = new Date().getMonth() + 1;
+    var realM = new Date().getMonth() + 1;
+    var m = monthPanelMonth;
     var sowList = APP_DATA.vegetables.filter(function (v) {
       return v.sowMonths && v.sowMonths.indexOf(m) !== -1;
     });
     var harvestList = APP_DATA.vegetables.filter(function (v) {
       return v.harvestMonths && v.harvestMonths.indexOf(m) !== -1;
     });
-    if (!sowList.length && !harvestList.length) { panel.innerHTML = ""; return; }
+    // 今月に該当が無いときだけ、これまで通りパネルごと隠す（他の月を見ている時は隠さない）
+    if (m === realM && !sowList.length && !harvestList.length) { panel.innerHTML = ""; return; }
 
     function group(label, cls, arr) {
       if (!arr.length) return "";
@@ -2133,15 +2162,22 @@
 
     var open = false;
     try { open = localStorage.getItem("yasai-techo-month-panel") === "open"; } catch (e) {}
+    var isThisMonth = m === realM;
+    var hasAny = sowList.length || harvestList.length;
 
     panel.innerHTML =
       '<details class="month-panel"' + (open ? " open" : "") + '>' +
-        '<summary>' + m + '月にできる作業' +
+        '<summary>' +
+          '<button type="button" class="mp-nav" data-mp="-1" aria-label="前の月">‹</button>' +
+          '<span class="mp-title">' + m + '月にできる作業</span>' +
+          '<button type="button" class="mp-nav" data-mp="1" aria-label="次の月">›</button>' +
           '<span class="mp-count">植え' + sowList.length + '・収穫' + harvestList.length + '</span>' +
         '</summary>' +
         '<div class="month-panel-body">' +
-          group("植えどき", "is-sow", sowList) +
-          group("収穫どき", "is-harvest", harvestList) +
+          (isThisMonth ? "" : '<button type="button" class="mp-today" id="mp-today">今月にもどる</button>') +
+          (hasAny
+            ? group("植えどき", "is-sow", sowList) + group("収穫どき", "is-harvest", harvestList)
+            : '<p class="mp-empty">この月に植えどき・収穫どきの野菜はありません。</p>') +
         '</div>' +
       '</details>';
 
@@ -2149,6 +2185,22 @@
     det.addEventListener("toggle", function () {
       try { localStorage.setItem("yasai-techo-month-panel", det.open ? "open" : "closed"); } catch (e) {}
     });
+    panel.querySelectorAll(".mp-nav").forEach(function (b) {
+      b.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var d = Number(b.getAttribute("data-mp"));
+        monthPanelMonth = ((monthPanelMonth - 1 + d + 12) % 12) + 1;
+        renderMonthPanel();
+      });
+    });
+    var todayBtn = document.getElementById("mp-today");
+    if (todayBtn) {
+      todayBtn.addEventListener("click", function () {
+        monthPanelMonth = new Date().getMonth() + 1;
+        renderMonthPanel();
+      });
+    }
     bindRowOpeners(panel);
   }
 
