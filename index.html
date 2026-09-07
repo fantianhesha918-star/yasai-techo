@@ -511,17 +511,6 @@
   }
   .empty-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-  .home-hero {
-    display: block;
-    width: 100%;
-    height: 116px;
-    object-fit: cover;
-    object-position: center 80%;
-    border-radius: var(--r-md);
-    margin-bottom: 14px;
-    border: 1px solid var(--line);
-  }
-
   .section-label {
     font-family: var(--font-head);
     font-size: 0.82rem;
@@ -1144,7 +1133,7 @@
   }
   .review-memo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-  /* ===== きょうの手当てカード ===== */
+  /* ===== きょうやることカード ===== */
   .care-card {
     background: var(--card-bg);
     background:
@@ -1503,7 +1492,6 @@
 
     <!-- ホーム -->
     <section class="view is-active" data-view="home">
-      <img class="home-hero" src="illust-home-hero.png" alt="" />
       <div id="home-care"></div>
       <div class="search-row">
         <input type="search" id="veg-search" class="search-input" placeholder="野菜名で検索" autocomplete="off" />
@@ -2246,7 +2234,7 @@
       }).join("");
     }
     var html = '<div class="care-card">' +
-      '<p class="care-title">きょうの手当て</p>' +
+      '<p class="care-title">きょうやること</p>' +
       '<p class="care-line"><span class="care-k">栽培中</span>' + growing.length + '種' +
         (doneToday.length ? '（今日 ' + doneToday.length + ' 種に水やり済み）' : '') + '</p>';
     if (needWater.length) {
