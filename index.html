@@ -1006,6 +1006,30 @@
   .memo-cat-badge.cat-furikaeri { background: rgba(77,122,63,0.12); color: var(--accent); }
   .memo-cat-badge.cat-tenki { background: var(--watch-soft); color: var(--watch-ink); }
 
+  /* ===== ふりかえり・収穫まとめ ===== */
+  .review-panel {
+    background: var(--card-bg); border: 1px solid var(--line);
+    border-radius: 12px; margin-top: 14px; font-size: 0.82rem;
+  }
+  .review-panel > summary {
+    cursor: pointer; padding: 11px 14px; font-weight: 700; list-style: none;
+  }
+  .review-panel > summary::-webkit-details-marker { display: none; }
+  .review-panel > summary::before { content: "▶ "; font-size: 0.7em; color: var(--ink-soft); }
+  .review-panel[open] > summary::before { content: "▼ "; }
+  .review-body { padding: 0 14px 14px; }
+  .review-h { font-weight: 700; font-size: 0.8rem; margin: 12px 0 6px; }
+  .review-harvest { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  .review-hv { font-size: 0.8rem; color: var(--ink-soft); }
+  .review-hv b { color: var(--ink); font-weight: 700; }
+  .review-memo {
+    display: block; width: 100%; text-align: left;
+    font: inherit; border: 1px solid var(--line); background: var(--app-bg);
+    border-radius: 10px; padding: 8px 10px; margin-bottom: 6px; cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+  }
+  .review-memo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
   /* ===== きょうの手当てカード ===== */
   .care-card {
     background: var(--card-bg); border: 1px solid var(--line);
@@ -1271,6 +1295,7 @@
     <section class="view" data-view="growing">
       <div id="growing-list"></div>
       <div id="history-list"></div>
+      <div id="review-list"></div>
     </section>
 
     <!-- コツ -->
@@ -1975,7 +2000,89 @@
       bindRowOpeners(container);
     }
     renderHistoryList();
+    renderReviewPanel();
     renderHomeCare();
+  }
+
+  function reviewEntryYear(dateStr) {
+    var p = (dateStr || "").split("-");
+    return p.length ? Number(p[0]) : 0;
+  }
+  function renderReviewPanel() {
+    var cont = document.getElementById("review-list");
+    if (!cont) return;
+    var yr = new Date().getFullYear();
+    var byVeg = {};
+    function addHarvest(name, dateStr) {
+      if (!name) return;
+      if (!byVeg[name]) byVeg[name] = { count: 0, thisYear: 0 };
+      byVeg[name].count++;
+      if (reviewEntryYear(dateStr) === yr) byVeg[name].thisYear++;
+    }
+    Object.keys(harvestData).forEach(function (vid) {
+      var veg = findVeg(vid);
+      var nm = veg ? veg.name : vid;
+      (harvestData[vid] || []).forEach(function (e) { addHarvest(nm, e.date); });
+    });
+    historyData.forEach(function (r) {
+      (r.harvests || []).forEach(function (e) { addHarvest(r.vegName || "", e.date); });
+    });
+    var names = Object.keys(byVeg).sort(function (a, b) { return byVeg[b].count - byVeg[a].count; });
+    var totalAll = names.reduce(function (s, n) { return s + byVeg[n].count; }, 0);
+    var totalYear = names.reduce(function (s, n) { return s + byVeg[n].thisYear; }, 0);
+
+    var memos = [];
+    Object.keys(notesData).forEach(function (vid) {
+      var veg = findVeg(vid);
+      (notesData[vid] || []).forEach(function (e) {
+        if (e.cat === "furikaeri") {
+          memos.push({ name: veg ? veg.name : vid, date: e.date, text: e.text, kind: "veg", key: vid });
+        }
+      });
+    });
+    historyData.forEach(function (r) {
+      (r.notes || []).forEach(function (e) {
+        if (e.cat === "furikaeri") {
+          memos.push({ name: (r.vegName || "") + "（記録）", date: e.date, text: e.text, kind: "hist", key: r.id });
+        }
+      });
+    });
+    memos.sort(function (a, b) { return (b.date || "").localeCompare(a.date || ""); });
+
+    if (!totalAll && !memos.length) { cont.innerHTML = ""; return; }
+
+    var html = '<details class="review-panel"><summary>ふりかえり・収穫まとめ</summary><div class="review-body">';
+    if (totalAll) {
+      html += '<p class="review-h">収穫の記録：合計 ' + totalAll + ' 回' +
+        (totalYear ? '（' + yr + '年 ' + totalYear + ' 回）' : '') + '</p>' +
+        '<div class="review-harvest">' + names.map(function (n) {
+          return '<span class="review-hv"><b>' + esc(n) + '</b> ' + byVeg[n].count + '回</span>';
+        }).join("") + '</div>';
+    }
+    if (memos.length) {
+      html += '<p class="review-h">ふりかえりメモ（' + memos.length + '）</p><div class="veg-list">' +
+        memos.map(function (mm, i) {
+          return '<button type="button" class="review-memo" data-review-i="' + i + '">' +
+            '<span class="record-entry-date">' + esc(mm.name) + '｜' + esc(niceDate(mm.date)) + '</span>' +
+            '<span class="record-entry-text">' + esc(mm.text) + '</span></button>';
+        }).join("") + '</div>';
+    }
+    html += '</div></details>';
+    cont.innerHTML = html;
+
+    var dp = cont.querySelector(".review-panel");
+    try { if (localStorage.getItem("yasai-techo-review-open") === "1") dp.open = true; } catch (e) {}
+    dp.addEventListener("toggle", function () {
+      try { localStorage.setItem("yasai-techo-review-open", dp.open ? "1" : "0"); } catch (e) {}
+    });
+    cont.querySelectorAll("[data-review-i]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var mm = memos[Number(btn.getAttribute("data-review-i"))];
+        if (!mm) return;
+        if (mm.kind === "hist") openHistory(mm.key);
+        else openDetail(mm.key);
+      });
+    });
   }
 
   function renderHistoryList() {
