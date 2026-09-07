@@ -1006,6 +1006,27 @@
   .memo-cat-badge.cat-furikaeri { background: rgba(77,122,63,0.12); color: var(--accent); }
   .memo-cat-badge.cat-tenki { background: var(--watch-soft); color: var(--watch-ink); }
 
+  /* ===== きょうの手当てカード ===== */
+  .care-card {
+    background: var(--card-bg); border: 1px solid var(--line);
+    border-radius: 12px; padding: 12px 14px; margin-bottom: 14px;
+  }
+  .care-title { font-size: 0.82rem; font-weight: 700; margin: 0 0 8px; }
+  .care-line {
+    font-size: 0.82rem; line-height: 1.6; margin: 4px 0;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  }
+  .care-k { font-weight: 700; color: var(--ink-soft); font-size: 0.76rem; }
+  .care-warn .care-k { color: var(--grow); }
+  .care-ok { color: var(--ink-soft); }
+  .care-chip {
+    font: inherit; font-size: 0.78rem;
+    padding: 3px 10px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--app-bg); color: var(--ink);
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+  }
+  .care-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
   /* ===== 今月の作業パネル ===== */
   .month-panel {
     background: var(--card-bg);
@@ -1237,6 +1258,7 @@
 
     <!-- ホーム -->
     <section class="view is-active" data-view="home">
+      <div id="home-care"></div>
       <div class="search-row">
         <input type="search" id="veg-search" class="search-input" placeholder="野菜名で検索" autocomplete="off" />
       </div>
@@ -1877,7 +1899,49 @@
     bindRowOpeners(panel);
   }
 
+  function renderHomeCare() {
+    var cont = document.getElementById("home-care");
+    if (!cont) return;
+    var growing = APP_DATA.vegetables.filter(function (v) { return !!growingData[v.id]; });
+    if (!growing.length) { cont.innerHTML = ""; return; }
+    var needWater = growing.filter(function (v) {
+      var last = lastWaterDate(v.id);
+      if (!last) return true;
+      var n = daysSince(last);
+      return n === null ? true : n >= 3;
+    });
+    var doneToday = growing.filter(function (v) {
+      var last = lastWaterDate(v.id);
+      return last && daysSince(last) <= 0;
+    });
+    var m = new Date().getMonth() + 1;
+    var harvestSoon = growing.filter(function (v) {
+      return v.harvestMonths && v.harvestMonths.indexOf(m) !== -1;
+    });
+    function chips(arr) {
+      return arr.map(function (v) {
+        return '<button type="button" class="care-chip" data-open="' + esc(v.id) + '">' + esc(v.name) + '</button>';
+      }).join("");
+    }
+    var html = '<div class="care-card">' +
+      '<p class="care-title">きょうの手当て</p>' +
+      '<p class="care-line"><span class="care-k">栽培中</span>' + growing.length + '種' +
+        (doneToday.length ? '（今日 ' + doneToday.length + ' 種に水やり済み）' : '') + '</p>';
+    if (needWater.length) {
+      html += '<p class="care-line care-warn"><span class="care-k">💧 水やり</span>' + chips(needWater) + '</p>';
+    } else {
+      html += '<p class="care-line care-ok"><span class="care-k">💧 水やり</span>ひと通りOK</p>';
+    }
+    if (harvestSoon.length) {
+      html += '<p class="care-line"><span class="care-k">🌾 収穫どき</span>' + chips(harvestSoon) + '</p>';
+    }
+    html += '</div>';
+    cont.innerHTML = html;
+    bindRowOpeners(cont);
+  }
+
   function renderHomeList() {
+    renderHomeCare();
     renderMonthPanel();
     var list = APP_DATA.vegetables.filter(function (v) {
       var matchesFilter = currentFilter === "all" || v.seasonKey === currentFilter;
@@ -1907,6 +1971,7 @@
       bindRowOpeners(container);
     }
     renderHistoryList();
+    renderHomeCare();
   }
 
   function renderHistoryList() {
