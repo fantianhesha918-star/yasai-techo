@@ -1127,7 +1127,7 @@
   }
   .review-memo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-  /* ===== きょうやることカード ===== */
+  /* ===== お世話メモカード ===== */
   .care-card {
     background: var(--card-bg);
     background:
@@ -2228,7 +2228,7 @@
       }).join("");
     }
     var html = '<div class="care-card">' +
-      '<p class="care-title">きょうやること</p>' +
+      '<p class="care-title">お世話メモ</p>' +
       '<p class="care-line"><span class="care-k">栽培中</span>' + growing.length + '種' +
         (doneToday.length ? '（今日 ' + doneToday.length + ' 種に水やり済み）' : '') + '</p>';
     if (needWater.length) {
