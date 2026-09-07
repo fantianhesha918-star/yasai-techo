@@ -293,7 +293,66 @@
   .row-chevron { flex: 0 0 auto; color: var(--ink-soft); }
   .row-chevron svg { width: 16px; height: 16px; display: block; }
 
+  /* 2カラムのコンパクト表示（ホーム・薬膳の一覧） */
+  .grid-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .grid-card {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    text-align: left;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 11px;
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+    min-width: 0;
+  }
+  .grid-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .grid-card-top { display: flex; align-items: center; gap: 7px; min-width: 0; }
+  .grid-card .monogram {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+  }
+  .grid-card .ys-badge {
+    min-width: 0;
+    font-size: 0.68rem;
+    padding: 2px 7px;
+  }
+  .grid-card-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.3;
+    word-break: break-word;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .grid-card-sub {
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .grid-card-estimate {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--grow);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .empty-state {
+    grid-column: 1 / -1;
     text-align: center;
     color: var(--ink-soft);
     font-size: 0.86rem;
@@ -669,14 +728,32 @@
     border: 1px solid var(--line);
     border-radius: 14px;
     box-shadow: var(--shadow-card);
-    padding: 13px 15px 15px;
     margin-bottom: 14px;
   }
-  .month-panel-title {
+  .month-panel > summary {
+    cursor: pointer;
+    padding: 12px 15px;
     font-size: 0.9rem;
     font-weight: 700;
-    margin: 0 0 10px;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
+  .month-panel > summary::-webkit-details-marker { display: none; }
+  .month-panel > summary::before { content: "\25B6"; font-size: 0.68em; color: var(--ink-soft); }
+  .month-panel[open] > summary::before { content: "\25BC"; }
+  .mp-count {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    background: var(--app-bg);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 1px 8px;
+    margin-left: auto;
+  }
+  .month-panel-body { padding: 2px 15px 14px; }
   .month-group + .month-group { margin-top: 10px; }
   .month-group-label {
     display: inline-block;
@@ -824,7 +901,7 @@
       </div>
       <div class="chip-row" id="chip-row"></div>
       <div id="month-panel"></div>
-      <div class="veg-list" id="home-list"></div>
+      <div class="grid-list" id="home-list"></div>
     </section>
 
     <!-- 栽培中 -->
@@ -841,7 +918,7 @@
     <!-- 薬膳 -->
     <section class="view" data-view="yakuzen">
       <div id="yakuzen-banner" class="yk-banner"></div>
-      <details class="yk-guide" id="yakuzen-guide" open>
+      <details class="yk-guide" id="yakuzen-guide">
         <summary>五性・五味・帰経ってなに？</summary>
         <div class="yk-guide-body">
           <p><span class="g-term">五性（ごせい）</span>その食材が体を温めるか冷やすか。<b>熱 → 温 → 平 → 涼 → 寒</b> の5段階で、「平」はどちらにも偏りません。冷えが気になるなら温・熱、ほてりやのぼせが気になるなら涼・寒が目安です。</p>
@@ -1107,6 +1184,22 @@
     );
   }
 
+  function vegCardHTML(veg) {
+    var growing = growingData[veg.id];
+    var color = seasonColorVar(veg.seasonKey);
+    return (
+      '<button class="grid-card" type="button" data-open="' + esc(veg.id) + '">' +
+        '<span class="grid-card-top">' +
+          '<span class="monogram" style="background:' + color + '">' + esc(veg.name.charAt(0)) + '</span>' +
+          '<span class="grid-card-name">' + esc(veg.name) +
+            (growing ? '<span class="grow-dot" title="栽培中"></span>' : '') +
+          '</span>' +
+        '</span>' +
+        '<span class="grid-card-sub">' + esc(veg.family) + '</span>' +
+      '</button>'
+    );
+  }
+
   function renderChips() {
     var row = document.getElementById("chip-row");
     var html = '<button class="chip' + (currentFilter === "all" ? " is-active" : "") + '" data-filter="all" type="button">すべて</button>';
@@ -1152,12 +1245,24 @@
       );
     }
 
+    var open = false;
+    try { open = localStorage.getItem("yasai-techo-month-panel") === "open"; } catch (e) {}
+
     panel.innerHTML =
-      '<div class="month-panel">' +
-        '<p class="month-panel-title">' + m + '月にできる作業</p>' +
-        group("植えどき", "is-sow", sowList) +
-        group("収穫どき", "is-harvest", harvestList) +
-      '</div>';
+      '<details class="month-panel"' + (open ? " open" : "") + '>' +
+        '<summary>' + m + '月にできる作業' +
+          '<span class="mp-count">植え' + sowList.length + '・収穫' + harvestList.length + '</span>' +
+        '</summary>' +
+        '<div class="month-panel-body">' +
+          group("植えどき", "is-sow", sowList) +
+          group("収穫どき", "is-harvest", harvestList) +
+        '</div>' +
+      '</details>';
+
+    var det = panel.querySelector("details");
+    det.addEventListener("toggle", function () {
+      try { localStorage.setItem("yasai-techo-month-panel", det.open ? "open" : "closed"); } catch (e) {}
+    });
     bindRowOpeners(panel);
   }
 
@@ -1173,7 +1278,7 @@
       container.innerHTML = '<div class="empty-state"><p>該当する野菜が見つかりませんでした。</p></div>';
       return;
     }
-    container.innerHTML = list.map(function (v) { return vegRowHTML(v); }).join("");
+    container.innerHTML = list.map(function (v) { return vegCardHTML(v); }).join("");
     bindRowOpeners(container);
   }
 
@@ -1656,17 +1761,16 @@
     YK_CATS.forEach(function (cat) {
       var group = items.filter(function (f) { return f.cat === cat; });
       if (!group.length) return;
-      html += '<p class="section-label yk-cat">' + esc(cat) + '</p><div class="veg-list">';
+      html += '<p class="section-label yk-cat">' + esc(cat) + '</p><div class="grid-list">';
       html += group.map(function (f) {
         var tone = seiTone(f.sei);
         return (
-          '<button class="veg-row" type="button" data-yakuzen="' + esc(f.name) + '">' +
-            '<span class="ys-badge ' + tone + '">' + esc(f.sei) + '</span>' +
-            '<span class="veg-row-main">' +
-              '<span class="veg-row-name">' + esc(f.name) + '</span>' +
-              '<span class="veg-row-sub">' + esc(f.kou) + '</span>' +
+          '<button class="grid-card" type="button" data-yakuzen="' + esc(f.name) + '">' +
+            '<span class="grid-card-top">' +
+              '<span class="ys-badge ' + tone + '">' + esc(f.sei) + '</span>' +
+              '<span class="grid-card-name">' + esc(f.name) + '</span>' +
             '</span>' +
-            '<span class="row-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>' +
+            '<span class="grid-card-sub">' + esc(f.kou) + '</span>' +
           '</button>'
         );
       }).join("");
@@ -1743,7 +1847,7 @@
   (function () {
     var g = document.getElementById("yakuzen-guide");
     if (!g) return;
-    try { if (localStorage.getItem("yasai-techo-yk-guide") === "closed") g.open = false; } catch (e) {}
+    try { if (localStorage.getItem("yasai-techo-yk-guide") === "open") g.open = true; } catch (e) {}
     g.addEventListener("toggle", function () {
       try { localStorage.setItem("yasai-techo-yk-guide", g.open ? "open" : "closed"); } catch (e) {}
     });
