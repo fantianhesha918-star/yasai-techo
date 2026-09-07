@@ -113,6 +113,7 @@
   }
 
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html, body { margin: 0; padding: 0; height: 100%; }
   body {
     background: var(--bg-outer);
@@ -1075,6 +1076,44 @@
   }
   .yk-shun-chip .ys-badge { font-size: 0.66rem; }
   .yk-guide-hd { margin: 14px 2px 8px; }
+  .yk-check-list { display: grid; gap: 1px; margin: 4px 0 12px; }
+  .yk-check {
+    display: flex; gap: 9px; align-items: flex-start;
+    padding: 7px 4px; font-size: 0.82rem; line-height: 1.5; cursor: pointer;
+  }
+  .yk-check input {
+    margin: 1px 0 0; flex: 0 0 auto; width: 17px; height: 17px; accent-color: var(--accent);
+  }
+  .yk-check-actions { display: flex; align-items: center; gap: 10px; }
+  .yk-check-btn {
+    font: inherit; font-weight: 700; font-size: 0.85rem;
+    padding: 9px 18px; border-radius: 999px; border: 0;
+    background: var(--accent); color: var(--accent-contrast); cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+  }
+  .yk-check-clear {
+    font: inherit; font-size: 0.82rem;
+    padding: 8px 14px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--card-bg); color: var(--ink-soft); cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+  }
+  .yk-check-result { margin-top: 12px; }
+  .yk-check-lead { font-weight: 700; margin: 0 0 6px; }
+  .yk-check-card {
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; margin-bottom: 8px; background: var(--app-bg);
+  }
+  .yk-check-name { font-weight: 700; margin: 0 0 4px; }
+  .yk-check-score { color: var(--ink-soft); font-weight: 400; font-size: 0.8rem; margin-left: 6px; }
+  .yk-check-sign, .yk-check-food { margin: 2px 0; font-size: 0.8rem; line-height: 1.55; }
+  .yk-check-jump {
+    margin-top: 7px; font: inherit; font-size: 0.8rem; font-weight: 700;
+    padding: 6px 12px; border-radius: 999px;
+    border: 1px solid var(--accent); background: rgba(77,122,63,0.08); color: var(--accent); cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+  }
+  .yk-check-note { font-size: 0.74rem; color: var(--ink-soft); line-height: 1.6; margin: 8px 0 0; }
+  .yk-check-none { font-size: 0.82rem; color: var(--offgrade-ink); margin: 0; }
   .yk-guide {
     background: var(--card-bg);
     border: 1px solid var(--line);
@@ -1182,6 +1221,40 @@
       <div id="yakuzen-banner" class="yk-banner"></div>
       <div id="yakuzen-shun" class="yk-shun"></div>
       <p class="section-label yk-guide-hd">薬膳の基礎知識（タップで開く）</p>
+      <details class="yk-guide" data-guide="check">
+        <summary>体質セルフチェック</summary>
+        <div class="yk-guide-body">
+          <p>当てはまるものにチェックして、下の「結果をみる」を押してください。あくまで目安です。</p>
+          <div class="yk-check-list">
+            <label class="yk-check"><input type="checkbox" data-type="kikyo" /><span>疲れやすく、少し動くと息切れする</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="kikyo" /><span>食後に眠くなる／胃腸が弱い</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="kikyo" /><span>風邪をひきやすい・声が小さい</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="kitai" /><span>お腹や胸が張る、ゲップ・ため息が多い</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="kitai" /><span>気分の浮き沈みが激しい</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="kitai" /><span>のどに何かつまった感じがある</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="kekkyo" /><span>顔色や唇の色が白い・つやがない</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="kekkyo" /><span>目がかすむ、立ちくらみがする</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="kekkyo" /><span>眠りが浅い・爪が割れやすい</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="oketsu" /><span>肩こり・頭痛が慢性的にある</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="oketsu" /><span>肌がくすむ、シミ・クマが目立つ</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="oketsu" /><span>刺すような痛み、経血に塊が混じる</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="inkyo" /><span>手のひら・足がほてる、寝汗をかく</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="inkyo" /><span>口や肌、目が乾く・空咳が出る</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="inkyo" /><span>のぼせて眠れない、便が乾く</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="yokyo" /><span>手足が冷える、寒がり</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="yokyo" /><span>トイレが近い・下痢しやすい</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="yokyo" /><span>腰やお腹が冷えてだるい</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="tanshitsu" /><span>体が重だるい、むくみやすい</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="tanshitsu" /><span>痰や鼻水が多い、軟便気味</span></label>
+            <label class="yk-check"><input type="checkbox" data-type="tanshitsu" /><span>雨の日や湿気で不調になる</span></label>
+          </div>
+          <div class="yk-check-actions">
+            <button type="button" class="yk-check-btn" id="yk-check-run">結果をみる</button>
+            <button type="button" class="yk-check-clear" id="yk-check-clear">クリア</button>
+          </div>
+          <div class="yk-check-result" id="yk-check-result" hidden></div>
+        </div>
+      </details>
       <details class="yk-guide" id="yakuzen-guide" data-guide="kihon">
         <summary>五性・五味・帰経ってなに？</summary>
         <div class="yk-guide-body">
@@ -2462,6 +2535,15 @@
     ["bempi", "便秘"], ["fumin", "寝つき・不眠"], ["kekkyo", "貧血・立ちくらみ"],
     ["imotare", "胃もたれ・食べ過ぎ"], ["kaze", "風邪のひきはじめ"]
   ];
+  var YK_TYPES = {
+    kikyo: { name: "気が足りない（気虚）", sign: "疲れ・息切れ・食後の眠気・胃腸が弱い", food: "米・いも・かぼちゃ・山芋・鶏肉・なつめ", concern: "tsukare" },
+    kitai: { name: "気がめぐらない（気滞）", sign: "張り・ため息・のどのつかえ・気分の波", food: "大葉・春菊・セロリ・玉ねぎ・陳皮・ジャスミン茶", concern: "iraira" },
+    kekkyo: { name: "血が足りない（血虚）", sign: "顔色が白い・目のかすみ・立ちくらみ・眠りが浅い", food: "ほうれん草・にんじん・黒豆・黒ごま・卵・なつめ・クコの実", concern: "kekkyo" },
+    oketsu: { name: "血がめぐらない（瘀血）", sign: "肩こり・肌のくすみ・刺す痛み・経血に塊", food: "玉ねぎ・納豆・黒きくらげ・青魚・酢", concern: "" },
+    inkyo: { name: "うるおい不足（陰虚）", sign: "ほてり・寝汗・乾燥・空咳・のぼせ", food: "豆腐・白きくらげ・梨・れんこん・豚肉・卵・はちみつ", concern: "kansou" },
+    yokyo: { name: "冷えが強い（陽虚）", sign: "冷え・寒がり・頻尿・下痢・腰の冷え", food: "生姜・にら・長ネギ・えび・鮭・くるみ・栗・シナモン", concern: "hie" },
+    tanshitsu: { name: "水がたまる（痰湿）", sign: "重だるい・むくみ・痰や鼻水・軟便・雨で不調", food: "はと麦・小豆・とうもろこし・とうがん・昆布・そら豆", concern: "mukumi" }
+  };
   var YK_RAW = [
     ["トマト", "野菜", "微寒", "甘・酸", "肝・脾・胃", "体の渇きを潤し、余分な熱を冷ます。夏の疲れやほてりに。", "体に熱がこもりやすい人／5〜8月", "冷え性の人は控えめに。", "hoteri,kansou", "豆腐と冷たいスープにするとのぼせに。冷え性は生姜を添えて"],
     ["ミニトマト", "野菜", "微寒", "甘・酸", "肝・脾・胃", "トマトと同様。潤して余分な熱を冷ます。", "体に熱がこもりやすい人／夏", "冷え性の人は控えめに。", "hoteri,kansou"],
@@ -2697,6 +2779,54 @@
     renderYakuzenList();
   }
 
+  function bindYakuzenCheck() {
+    var run = document.getElementById("yk-check-run");
+    if (!run) return;
+    var clear = document.getElementById("yk-check-clear");
+    var result = document.getElementById("yk-check-result");
+    function boxes() { return document.querySelectorAll('.yk-check-list input[type="checkbox"]'); }
+    run.addEventListener("click", function () {
+      var score = {};
+      boxes().forEach(function (b) {
+        if (b.checked) { var t = b.getAttribute("data-type"); score[t] = (score[t] || 0) + 1; }
+      });
+      var ranked = Object.keys(score).sort(function (a, b) { return score[b] - score[a]; });
+      result.hidden = false;
+      if (!ranked.length) {
+        result.innerHTML = '<p class="yk-check-none">チェックがありません。当てはまるものを選んでください。</p>';
+        return;
+      }
+      var topScore = score[ranked[0]];
+      var top = ranked.filter(function (t) { return score[t] === topScore; });
+      var html = '<p class="yk-check-lead">当てはまりが多いのは：</p>';
+      top.forEach(function (t) {
+        var d = YK_TYPES[t];
+        html += '<div class="yk-check-card">' +
+          '<p class="yk-check-name">' + esc(d.name) + '<span class="yk-check-score">' + score[t] + ' / 3</span></p>' +
+          '<p class="yk-check-sign">サイン：' + esc(d.sign) + '</p>' +
+          '<p class="yk-check-food">向く食材：' + esc(d.food) + '</p>' +
+          (d.concern ? '<button type="button" class="yk-check-jump" data-concern="' + d.concern + '">この悩みで食材を絞る ›</button>' : '') +
+          '</div>';
+      });
+      html += '<p class="yk-check-note">複数当てはまるのが普通です。体調・季節でも変わります。不調が続くときは専門家に相談を。</p>';
+      result.innerHTML = html;
+      result.querySelectorAll("[data-concern]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          currentConcern = btn.getAttribute("data-concern");
+          renderYakuzenChips();
+          renderYakuzenList();
+          var listEl = document.getElementById("yakuzen-list");
+          if (listEl && listEl.scrollIntoView) listEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+    });
+    clear.addEventListener("click", function () {
+      boxes().forEach(function (b) { b.checked = false; });
+      result.hidden = true;
+      result.innerHTML = "";
+    });
+  }
+
   function openYakuzen(name) {
     var f = null;
     for (var i = 0; i < YAKUZEN.length; i++) {
@@ -2884,6 +3014,7 @@
   renderGrowingList();
   renderTips();
   renderYakuzen();
+  bindYakuzenCheck();
 
   (function () {
     var guides = document.querySelectorAll(".yk-guide[data-guide]");
