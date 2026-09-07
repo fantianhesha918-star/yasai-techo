@@ -740,6 +740,38 @@
   }
   .yk-empty { text-align: center; color: var(--ink-soft); font-size: 0.86rem; padding: 40px 20px; }
 
+  .yk-guide {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    font-size: 0.8rem;
+  }
+  .yk-guide > summary {
+    cursor: pointer;
+    padding: 10px 13px;
+    font-weight: 700;
+    list-style: none;
+  }
+  .yk-guide > summary::-webkit-details-marker { display: none; }
+  .yk-guide > summary::before { content: "▶ "; font-size: 0.7em; color: var(--ink-soft); }
+  .yk-guide[open] > summary::before { content: "▼ "; }
+  .yk-guide-body { padding: 2px 13px 12px; }
+  .yk-guide-body p { margin: 0 0 9px; line-height: 1.7; }
+  .yk-guide-body p:last-child { margin-bottom: 0; }
+  .yk-guide-body .g-term {
+    display: inline-block;
+    font-weight: 700;
+    color: var(--accent);
+    margin-right: 0.3em;
+  }
+  .yk-termnote {
+    font-size: 0.74rem;
+    color: var(--ink-soft);
+    line-height: 1.65;
+    margin: -2px 0 12px;
+  }
+
   /* ===== ボトムナビ ===== */
   .bottom-nav {
     flex: 0 0 auto;
@@ -809,6 +841,14 @@
     <!-- 薬膳 -->
     <section class="view" data-view="yakuzen">
       <div id="yakuzen-banner" class="yk-banner"></div>
+      <details class="yk-guide" id="yakuzen-guide" open>
+        <summary>五性・五味・帰経ってなに？</summary>
+        <div class="yk-guide-body">
+          <p><span class="g-term">五性（ごせい）</span>その食材が体を温めるか冷やすか。<b>熱 → 温 → 平 → 涼 → 寒</b> の5段階で、「平」はどちらにも偏りません。冷えが気になるなら温・熱、ほてりやのぼせが気になるなら涼・寒が目安です。</p>
+          <p><span class="g-term">五味（ごみ）</span>味の傾向と働き。<b>酸</b>＝引き締める／<b>苦</b>＝熱を冷ます・余分を出す／<b>甘</b>＝補う・ゆるめる／<b>辛</b>＝発散する・巡らせる／<b>鹹（かん／塩からい）</b>＝かたまりをやわらげる。1つの食材が複数もつこともあります。</p>
+          <p><span class="g-term">帰経（きけい）</span>その食材が主に働きかける体の場所（東洋医学の考え方）。<b>肝</b>＝気の巡り・目／<b>心</b>＝血・精神／<b>脾</b>＝胃腸・消化／<b>肺</b>＝呼吸・皮膚・うるおい／<b>腎</b>＝生命力・水分・老化。胃・大腸・小腸・膀胱は消化と排泄にかかわります。</p>
+        </div>
+      </details>
       <div class="chip-row" id="yakuzen-chips"></div>
       <div id="yakuzen-list"></div>
       <p class="yk-disclaimer">薬膳・東洋医学の伝統的な考え方に基づく一般的な分類です。体質や体調には個人差があり、効果を保証するものではありません。持病がある方・妊娠中の方・薬を服用中の方は医師や専門家にご相談ください。</p>
@@ -1566,6 +1606,17 @@
   function toneColorVar(tone) {
     return tone === "warm" ? "var(--grow)" : tone === "cool" ? "var(--watch-ink)" : "var(--ink-soft)";
   }
+  function seiDesc(s) {
+    if (s.indexOf("〜") !== -1) return "冷やす";
+    if (s.indexOf("熱") !== -1) return "強く温める";
+    if (s.indexOf("微温") !== -1) return "少し温める";
+    if (s.indexOf("温") !== -1) return "温める";
+    if (s.indexOf("平") !== -1) return "温めも冷やしもしない";
+    if (s.indexOf("微寒") !== -1 || s.indexOf("微涼") !== -1) return "少し冷やす";
+    if (s.indexOf("寒") !== -1) return "強く冷やす";
+    if (s.indexOf("涼") !== -1) return "冷やす";
+    return "";
+  }
 
   function renderYakuzenBanner() {
     var m = new Date().getMonth() + 1;
@@ -1647,10 +1698,11 @@
     tag.style.background = toneColorVar(seiTone(f.sei));
     document.getElementById("sheet-body").innerHTML =
       '<dl class="fact-grid">' +
-        '<div class="fact-row"><dt>五性</dt><dd>' + esc(f.sei) + '</dd></div>' +
+        '<div class="fact-row"><dt>五性</dt><dd>' + esc(f.sei) + '（' + esc(seiDesc(f.sei)) + '）</dd></div>' +
         '<div class="fact-row"><dt>五味</dt><dd>' + esc(f.mi) + '</dd></div>' +
         '<div class="fact-row"><dt>帰経</dt><dd>' + esc(f.kei) + '</dd></div>' +
       '</dl>' +
+      '<p class="yk-termnote">五性＝体を温める/冷やす傾向、五味＝味の傾向と働き、帰経＝主に働きかける体の部位。くわしくは薬膳タブ上部の解説を参照。</p>' +
       '<p class="note-block note-tip"><span class="note-label">効能</span>' + esc(f.kou) + '</p>' +
       '<p class="note-block note-watch"><span class="note-label">向く人</span>' + esc(f.muku) + '</p>' +
       (f.chui && f.chui !== "—"
@@ -1687,6 +1739,15 @@
   renderGrowingList();
   renderTips();
   renderYakuzen();
+
+  (function () {
+    var g = document.getElementById("yakuzen-guide");
+    if (!g) return;
+    try { if (localStorage.getItem("yasai-techo-yk-guide") === "closed") g.open = false; } catch (e) {}
+    g.addEventListener("toggle", function () {
+      try { localStorage.setItem("yasai-techo-yk-guide", g.open ? "open" : "closed"); } catch (e) {}
+    });
+  })();
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
