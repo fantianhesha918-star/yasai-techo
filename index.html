@@ -704,6 +704,42 @@
   .month-veg-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .mvc-dot { width: 6px; height: 6px; border-radius: 50%; flex: 0 0 auto; }
 
+  /* ===== 薬膳タブ ===== */
+  .yk-banner {
+    background: var(--grow-soft);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 13px;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    margin-bottom: 12px;
+  }
+  .yk-banner strong { color: var(--grow); }
+  .ys-badge {
+    flex: 0 0 auto;
+    min-width: 3.6em;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  .ys-badge.warm { color: var(--grow); border-color: var(--grow); background: var(--grow-soft); }
+  .ys-badge.cool { color: var(--watch-ink); border-color: var(--watch-ink); background: var(--watch-soft); }
+  .ys-badge.neutral { color: var(--ink-soft); border-color: var(--line); }
+  .yk-cat { margin-top: 14px; }
+  .yk-cat:first-child { margin-top: 0; }
+  .yk-disclaimer {
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin: 16px 2px 4px;
+  }
+  .yk-empty { text-align: center; color: var(--ink-soft); font-size: 0.86rem; padding: 40px 20px; }
+
   /* ===== ボトムナビ ===== */
   .bottom-nav {
     flex: 0 0 auto;
@@ -770,6 +806,14 @@
       <div id="tips-list"></div>
     </section>
 
+    <!-- 薬膳 -->
+    <section class="view" data-view="yakuzen">
+      <div id="yakuzen-banner" class="yk-banner"></div>
+      <div class="chip-row" id="yakuzen-chips"></div>
+      <div id="yakuzen-list"></div>
+      <p class="yk-disclaimer">薬膳・東洋医学の伝統的な考え方に基づく一般的な分類です。体質や体調には個人差があり、効果を保証するものではありません。持病がある方・妊娠中の方・薬を服用中の方は医師や専門家にご相談ください。</p>
+    </section>
+
   </main>
 
   <nav class="bottom-nav">
@@ -784,6 +828,10 @@
     <button class="nav-btn" data-nav="tips" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a6 6 0 0 0-4 10.5c.6.5 1 1.3 1 2.1V16h6v-1.4c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 2z"/></svg>
       <span>コツ</span>
+    </button>
+    <button class="nav-btn" data-nav="yakuzen" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18"/><path d="M5 9a7 7 0 0 0 14 0"/><path d="M2 21h20"/><path d="M8 6c0-1 .6-1.6 1-2M12 6c0-1 .6-1.6 1-2M16 6c0-1 .6-1.6 1-2"/></svg>
+      <span>薬膳</span>
     </button>
   </nav>
 
@@ -960,6 +1008,7 @@
   var currentFilter = "all";
   var currentSearch = "";
   var currentNav = "home";
+  var currentConcern = "all";
 
   function esc(s) {
     var div = document.createElement("div");
@@ -1423,10 +1472,199 @@
     if (e.key === "Escape") closeDetail();
   });
 
+  /* ===== 薬膳タブ ===== */
+  // 出典：クラシエ「薬膳食材図鑑」。図鑑に項目のない食材はここには載せない。
+  // [名前, 分類, 五性, 五味, 帰経, ひとこと効能, 向く人・季節, 注意, 悩みタグ]
+  var YK_CATS = ["野菜", "穀類・豆", "肉・卵", "魚介", "きのこ・海藻", "種実", "果物", "薬味・薬膳"];
+  var YK_CONCERNS = [
+    ["all", "すべて"], ["hie", "冷え"], ["hoteri", "ほてり・のぼせ"], ["mukumi", "むくみ"],
+    ["tsukare", "疲れ・食欲不振"], ["kansou", "乾燥・空咳"], ["iraira", "イライラ"]
+  ];
+  var YK_RAW = [
+    ["トマト", "野菜", "微寒", "甘・酸", "肝・脾・胃", "体の渇きを潤し、余分な熱を冷ます。夏の疲れやほてりに。", "体に熱がこもりやすい人／5〜8月", "冷え性の人は控えめに。", "hoteri,kansou"],
+    ["ミニトマト", "野菜", "微寒", "甘・酸", "肝・脾・胃", "トマトと同様。潤して余分な熱を冷ます。", "体に熱がこもりやすい人／夏", "冷え性の人は控えめに。", "hoteri,kansou"],
+    ["ナス", "野菜", "涼", "甘", "脾・肺・大腸", "体にこもった熱を冷まし、余分な水分を出す。むくみにも。", "のぼせ・むくみが気になる人／夏", "冷え性・子ども・高齢者は食べ過ぎ注意。生姜と合わせると和らぐ。", "hoteri,mukumi"],
+    ["ピーマン", "野菜", "平", "辛・甘", "肝・心・胃・腎", "胃腸の働きを整え、気を巡らせてイライラ・緊張をやわらげる。", "ストレスや胃腸の不調がある人／夏", "—", "iraira,tsukare"],
+    ["キュウリ", "野菜", "寒", "甘", "胃・小腸", "体の熱を冷まし、利尿でむくみをとる。", "のぼせ・むくみが気になる人／夏", "胃腸が弱い人は控えめに。ねぎ・生姜と。", "hoteri,mukumi"],
+    ["ゴーヤ", "野菜", "寒", "苦", "心・脾・胃", "体の熱を冷ます。目の充血・吹き出物・夏バテに。", "体に熱がこもりやすい人／夏", "冷やす力が強い。子ども・妊娠中は控えめに。", "hoteri"],
+    ["ズッキーニ", "野菜", "寒", "甘", "肺・脾・胃", "熱を冷まし、乾燥を潤す。空咳・口の渇き・むくみに。", "のぼせ・乾燥が気になる人／夏", "—", "hoteri,kansou,mukumi"],
+    ["とうがん", "野菜", "涼", "甘", "肺・大腸・膀胱", "熱を冷まし、頭にのぼった熱を降ろす。利尿でむくみ・夏バテに。", "のぼせ・むくみが気になる人／夏", "—", "hoteri,mukumi"],
+    ["スイカ", "野菜", "寒", "甘", "心・胃・膀胱", "強く熱を冷まし、潤いを補う。利尿で夏バテ・むくみに。", "体に熱がこもりやすい人／夏", "冷え性・胃腸が弱い人は控えめに。", "hoteri,mukumi"],
+    ["カボチャ", "野菜", "温", "甘", "脾・胃", "体を温めて気を補い、余分な水分を出す。冷え・疲労・食欲不振に。", "冷え性・疲れやすい人", "—", "hie,tsukare,mukumi"],
+    ["トウモロコシ", "野菜", "平", "甘", "脾・胃", "利尿でむくみをとり、気を補って胃腸を整える。", "むくみ・胃腸が弱い人／梅雨〜夏", "ひげ（南蛮毛）は利尿の生薬。", "mukumi,tsukare"],
+    ["いんげん", "野菜", "平", "甘", "脾・胃", "食欲不振・お腹の張り・胃もたれに。余分な水分も出す。", "胃腸の不調・むくみがある人／夏", "食べ過ぎるとガスがたまりやすい。", "tsukare,mukumi"],
+    ["スナップえんどう", "野菜", "平", "甘", "脾・胃", "余分な水分を出してむくみに。熱をとるので吹き出物にも。", "むくみ・吹き出物が気になる人／初夏", "図鑑の分類は「えんどう豆」。", "mukumi,hoteri"],
+    ["サツマイモ", "野菜", "平", "甘", "脾・胃", "胃腸を丈夫にし、便通を整える。体質を選ばず使いやすい。", "胃腸が弱い・便秘がちな人／秋", "食べ過ぎるとお腹が張りやすい。", "tsukare"],
+    ["里芋", "野菜", "平", "甘・辛", "脾", "疲労回復と消化促進、便通に。", "疲れ・消化不良がある人／秋", "湿をためやすいので食べ過ぎ注意。", "tsukare"],
+    ["生姜", "野菜", "温", "辛", "肺・脾・胃", "体を温めて発汗を促す。胃腸の冷え・吐き気に。", "冷え・寒けがある人／冬・春", "—", "hie"],
+    ["ごぼう", "野菜", "微涼", "辛・苦", "肺・胃・大腸", "気を補い、滞った気を巡らせる。のどの腫れ・便通にも。", "疲れやすい・気分が不安定な人／秋", "胃腸が弱い・乾燥体質の人は控えめに。", "tsukare,iraira"],
+    ["バジル", "野菜", "温", "辛", "肺・脾・胃", "気を巡らせ、食欲不振・お腹の張りに。血行も促す。", "冷え・気の巡りが悪い人／夏", "妊娠中・子どもは控えめに。", "hie,iraira,tsukare"],
+    ["大葉（しそ）", "野菜", "温", "辛", "肺・脾", "体を温めて発汗を促し、香りで気を巡らせる。胃の不調・魚介の毒消しに。", "冷え・ストレスを感じやすい人／夏", "—", "hie,iraira"],
+    ["みょうが", "野菜", "温", "辛", "肺・大腸・膀胱", "血行を促し、発汗と食欲増進に。冷えにも。", "冷え・食欲が落ちている人／夏〜秋", "—", "hie"],
+    ["大根", "野菜", "涼", "甘・辛", "肺・胃", "熱を冷まし、のど・咳・痰に。消化を助け、お腹の張りにも。", "のどの不調・食べ過ぎが気になる人／冬", "—", "hoteri,kansou"],
+    ["白菜", "野菜", "平", "甘", "胃・大腸", "胃腸を整えて消化を促し、便通・潤いに。二日酔いにも。", "便秘がち・のどが乾く人／冬", "豚肉と合わせると潤い。", "tsukare,kansou"],
+    ["キャベツ", "野菜", "平", "甘", "肝・胃・腎", "胃を丈夫にして消化を促し、気を補う。疲れ・食欲不振に。", "胃の調子が悪い人／春", "春キャベツは生食向き。", "tsukare"],
+    ["ほうれん草", "野菜", "涼", "甘", "肝・大腸・胃", "血を補い、巡りをよくする。熱を冷まし、腸を潤す。", "のぼせ・貧血・便秘がちな人／冬", "—", "hoteri,kansou"],
+    ["小松菜", "野菜", "涼", "甘・辛", "肺・肝・脾", "余分な熱を冷ます。イライラ・不眠・乾いた便に。", "のぼせ・イライラ・不眠がある人／冬", "—", "hoteri,iraira"],
+    ["チンゲンサイ", "野菜", "涼", "甘", "肝・肺・脾", "熱を冷まし、血の巡りをよくする。産後や貧血時の巡りに。", "のぼせ・巡りが気になる人／秋", "—", "hoteri"],
+    ["ニンジン", "野菜", "平", "甘", "肺・脾・肝", "血を補い、目の乾燥・貧血に。食欲不振・咳や痰にも。", "貧血・目の疲れ・食欲不振がある人／冬", "—", "tsukare,kansou"],
+    ["カブ", "野菜", "平", "甘・辛・苦", "脾・肺", "のぼった気を下げ、のぼせ・イライラに。消化も助ける。", "のぼせ・イライラがある人／冬", "生は体を冷やす。", "iraira,hoteri"],
+    ["長ネギ", "野菜", "温", "辛", "肺・胃", "体を温めて気血を巡らせる。寒けの風邪の初期・食欲不振に。", "冷え・寒けがある人／冬", "白い部分は風邪の初期に。", "hie"],
+    ["春菊", "野菜", "平", "甘・辛", "肝・肺・心・脾", "香りが気を巡らせ、ストレスを発散。胃腸・不眠にも。", "イライラ・不眠・胃腸が弱い人／春", "胃腸が弱い人は食べ過ぎ注意。", "iraira,tsukare"],
+    ["ニラ", "野菜", "温", "辛", "肝・胃・腎", "体を温める。冷え・腰の重さ（腎の弱り）に。香りで気も巡る。", "冷え・腰の冷えがある人／春", "—", "hie"],
+    ["玉ねぎ", "野菜", "温", "辛・甘", "肺・脾・胃", "気血を巡らせて体を温める。胃のもたれ・食欲不振に。", "冷え・巡りが悪い人／梅雨", "水にさらすのは短時間に。", "hie,iraira"],
+    ["そら豆", "野菜", "平", "甘", "脾・胃", "余分な水分を出す。梅雨のだるさ・むくみ・食欲不振に。", "むくみ・だるさがある人／初夏", "—", "mukumi,tsukare"],
+    ["いちご", "野菜", "涼", "甘・酸", "脾・肺", "熱をとり、のどの渇きを潤す。消化も助ける。", "のどが乾く・のぼせがある人／春", "冷え・下痢しやすい人は控えめに。", "hoteri,kansou"],
+    ["ニンニク", "野菜", "温", "辛", "脾・胃・肺", "気血を巡らせ、お腹の冷えに。解毒・食欲増進にも。", "冷え・食欲が落ちている人／春・冬", "アトピー・にきび体質の人は控えめに。", "hie"],
+    ["じゃがいも", "野菜", "平", "甘", "胃・大腸", "気を補い、疲れ・消化不良・息切れに。胃腸を丈夫に。", "疲れやすい・胃腸が弱い人／春・秋", "食べ過ぎるとガスがたまりやすい。", "tsukare"],
+    ["レタス", "野菜", "涼", "甘・苦", "大腸・小腸・胃", "余分な熱をとり、利尿に。イライラ・母乳の出にも。", "のぼせ・イライラがある人／春〜夏", "冷えが気になるならスープなど温かくして。", "hoteri,iraira"],
+    ["れんこん", "野菜", "涼〜寒", "甘", "心・脾・肺", "（生）熱をとり血行を促す。のどの渇き・咳に。加熱すると胃腸を養う。", "のどの不調・のぼせがある人／冬", "冷えが気になるなら加熱して。", "hoteri,kansou"],
+    ["山芋", "野菜", "平", "甘", "脾・腎・肺", "滋養強壮。疲れやすい・食欲がない人に。肺や肌の乾燥にも。", "疲れやすい・乾燥が気になる人／冬", "—", "tsukare,kansou"],
+    ["たけのこ", "野菜", "寒", "甘", "胃・大腸", "熱をとってイライラをやわらげ、利尿・便通に。", "のぼせ・便秘がち・むくみがある人／春", "あく抜きが必要。冷え性は控えめに。", "hoteri,mukumi,iraira"],
+    ["もち米", "穀類・豆", "温", "甘", "脾・胃・肺", "気を補い、体を温める。疲れやすい・冷えがある人に。", "気虚・冷えがある人", "消化に重いので胃腸が弱い人は少量から。", "hie,tsukare"],
+    ["大豆", "穀類・豆", "平", "甘", "脾・胃・大腸", "気を補って胃腸を整え、余分な水分を出す。", "疲れ・むくみがある人／秋", "加工（豆腐・納豆など）で性質が変わる。", "tsukare,mukumi"],
+    ["黒豆", "穀類・豆", "平", "甘", "脾・腎", "腎を補い、目の疲れ・むくみ・めまいに。滋養強壮。", "目の疲れ・むくみがある人／秋", "—", "tsukare,mukumi"],
+    ["小豆", "穀類・豆", "微寒", "甘・酸", "心・小腸・脾", "利尿でむくみをとる。", "むくみが気になる人／梅雨〜夏", "かぼちゃと煮ると温性を補える。", "mukumi"],
+    ["豆腐", "穀類・豆", "涼", "甘", "脾・胃・大腸", "こもった熱を冷まし、体を潤す。口の渇き・空咳に。", "のぼせ・乾燥が気になる人", "冷え性は単独での食べ過ぎを避ける。", "hoteri,kansou"],
+    ["納豆", "穀類・豆", "温", "甘", "脾・肺", "腸内環境を整え、血の巡りをよくする。肩こり・生理痛に。", "巡りが悪い・便通が気になる人", "—", "tsukare"],
+    ["味噌", "穀類・豆", "平", "甘・鹹", "脾・胃・心・腎", "余分な水分を出し、こもった熱をやわらげる。", "むくみ・のぼせが気になる人", "塩分が多いので摂り過ぎ注意。", "mukumi,hoteri"],
+    ["鶏肉（手羽）", "肉・卵", "温", "甘", "脾・胃", "胃腸を温めて気血を補う。手羽はコラーゲンが多く肌の潤いにも。", "冷え・疲れ・肌の乾燥が気になる人／冬", "—", "hie,tsukare,kansou"],
+    ["豚肉", "肉・卵", "微寒", "甘・鹹", "脾・胃・腎", "気血を補い、腎を養って潤す。加齢の物忘れ・足腰の疲れに。", "疲れ・乾燥が気になる人／冬", "—", "tsukare,kansou"],
+    ["卵", "肉・卵", "平", "甘", "肺・脾・胃・心・腎", "体を潤し、血を補う。貧血・空咳・不眠に。", "貧血・空咳・不眠がある人／秋", "—", "kansou,tsukare"],
+    ["鮭", "魚介", "温", "甘", "脾・肺", "胃を温めて整え、血行を促す。冷え・むくみに。", "冷え・むくみがある人／秋〜冬", "—", "hie,mukumi"],
+    ["えび", "魚介", "温", "甘・鹹", "肝・腎", "体を温め、腎を養う。冷え・寒い時期に。", "冷え性の人／冬", "食べ過ぎると熱がこもりやすい。", "hie"],
+    ["しじみ", "魚介", "寒", "甘・鹹", "肝・腎", "熱をとり、余分な水分を出す。二日酔い・血の不足に。", "のぼせ・二日酔いが気になる人／夏", "冷え性はねぎ・生姜と。", "hoteri,mukumi"],
+    ["しいたけ", "きのこ・海藻", "平", "甘", "胃・肝", "こもった熱をとり、気血を巡らせて胃腸を整える。便通にも。", "疲れ・便通が気になる人／春", "—", "tsukare"],
+    ["黒きくらげ", "きのこ・海藻", "平", "甘", "胃・大腸", "血の巡りをよくし、潤いを与える。生理痛・更年期の不調に。", "巡りが悪い・乾燥が気になる人", "—", "tsukare,kansou"],
+    ["白きくらげ", "きのこ・海藻", "平", "甘", "肺・胃・腎", "強く潤す。乾燥肌・空咳・のどの渇きに。", "乾燥・空咳が気になる人／秋", "—", "kansou"],
+    ["昆布", "きのこ・海藻", "寒", "鹹", "肝・胃・腎", "体のしこりをやわらげ、熱をとって余分な水分を出す。", "むくみが気になる人／夏", "塩分・ヨウ素が多いので摂り過ぎ注意。", "mukumi"],
+    ["くるみ", "種実", "温", "甘", "腎・肺・大腸", "腎を補い、乾いた便秘・腰痛・頻尿に。", "冷え・乾燥便秘がある人／秋", "—", "hie,kansou"],
+    ["黒ごま", "種実", "平", "甘", "肝・腎", "腎を補い、白髪・耳鳴りなど加齢の不調に。腸を潤す。", "乾燥・加齢の不調が気になる人／冬", "—", "kansou"],
+    ["栗", "種実", "温", "甘", "脾・腎", "腎を補って腰・足腰を養い、気を補う。血行も。", "冷え・疲れ・足腰の弱りがある人／秋", "便秘がち・小児は食べ過ぎ注意。", "hie,tsukare"],
+    ["りんご", "果物", "平", "甘・酸", "脾・胃・大腸", "熱をとって潤し、便通・消化を助ける。", "便秘がち・のどが乾く人／秋〜冬", "—", "kansou,tsukare"],
+    ["梨", "果物", "涼", "甘・微酸", "肺・胃", "のど・肺の乾燥、空咳、痰に。", "のどが乾く・空咳がある人／秋", "胃腸が弱い人・子どもは加熱して。", "kansou,hoteri"],
+    ["梅（梅干し）", "果物", "平", "酸", "肝・脾・肺・大腸", "熱をとり、腸の働きを整える。汗をかき過ぎる時にも。", "お腹をこわしやすい人／初夏", "汗をかきにくい人は控えめに。塩分注意。", "hoteri"],
+    ["陳皮（みかんの皮）", "薬味・薬膳", "温", "辛・苦", "脾・肺", "気を巡らせ、食欲不振・お腹の張りに。湿をとり、咳・痰にも。", "ストレス・胃腸の張りがある人／冬", "—", "iraira,tsukare"],
+    ["シナモン", "薬味・薬膳", "熱", "辛・甘", "心・肝・脾・腎", "体を強く温め、血行を促す。冷え・生理不順・生理痛に。", "強い冷えがある人／冬", "温める力が強い。のぼせ・熱性の不調がある人は慎重に。", "hie"],
+    ["とうがらし", "薬味・薬膳", "熱", "辛", "心・脾", "体を温めて余分な湿を出し、血行を促す。お腹の冷えに。", "冷え・お腹が冷える人", "食べ過ぎると水分が不足しやすい。", "hie"],
+    ["なつめ", "薬味・薬膳", "温", "甘", "脾・胃・心", "気血を補い、胃腸を丈夫にする。イライラ・不眠に。", "疲れ・不眠・気分が不安定な人", "—", "tsukare,iraira"],
+    ["クコの実", "薬味・薬膳", "平", "甘", "肝・腎・肺", "腎を補い、疲れ目・目の乾燥・めまい・頻尿に。", "目の疲れ・加齢の不調が気になる人", "—", "tsukare,kansou"]
+  ];
+  var YAKUZEN = YK_RAW.map(function (r) {
+    return { name: r[0], cat: r[1], sei: r[2], mi: r[3], kei: r[4], kou: r[5], muku: r[6], chui: r[7], tags: r[8].split(",") };
+  });
+  var YK_DISCLAIMER = "薬膳・東洋医学の伝統的な考え方に基づく一般的な分類です。体質や体調には個人差があり、効果を保証するものではありません。持病がある方・妊娠中の方・薬を服用中の方は医師や専門家にご相談ください。";
+
+  function seiTone(s) {
+    if (s.indexOf("熱") !== -1) return "warm";
+    if (s.indexOf("微寒") !== -1 || s.indexOf("微涼") !== -1) return "cool";
+    if (s.indexOf("温") !== -1) return "warm";
+    if (s.indexOf("平") !== -1) return "neutral";
+    if (s.indexOf("寒") !== -1 || s.indexOf("涼") !== -1) return "cool";
+    return "neutral";
+  }
+  function toneColorVar(tone) {
+    return tone === "warm" ? "var(--grow)" : tone === "cool" ? "var(--watch-ink)" : "var(--ink-soft)";
+  }
+
+  function renderYakuzenBanner() {
+    var m = new Date().getMonth() + 1;
+    var s;
+    if (m >= 3 && m <= 5) s = ["春", "気を巡らせる香り野菜と酸味を。<strong>青（緑）</strong>の食材が肝をいたわります。"];
+    else if (m === 6) s = ["梅雨", "余分な水分を出す食材と甘味を。<strong>黄</strong>の食材が胃腸（脾）を守ります。"];
+    else if (m >= 7 && m <= 8) s = ["夏", "熱を冷ます涼・寒の食材と苦味を。<strong>赤</strong>の食材を意識して。"];
+    else if (m >= 9 && m <= 11) s = ["秋", "体を潤す食材と辛味を。<strong>白</strong>の食材が肺をいたわります。"];
+    else s = ["冬", "体を温める温・熱の食材と鹹味を。<strong>黒</strong>の食材で力を蓄えて。"];
+    document.getElementById("yakuzen-banner").innerHTML = "<strong>" + s[0] + "</strong>：" + s[1];
+  }
+
+  function renderYakuzenChips() {
+    var row = document.getElementById("yakuzen-chips");
+    row.innerHTML = YK_CONCERNS.map(function (c) {
+      return '<button class="chip' + (currentConcern === c[0] ? " is-active" : "") + '" data-concern="' + c[0] + '" type="button">' + esc(c[1]) + '</button>';
+    }).join("");
+    row.querySelectorAll(".chip").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        currentConcern = btn.getAttribute("data-concern");
+        renderYakuzenChips();
+        renderYakuzenList();
+      });
+    });
+  }
+
+  function renderYakuzenList() {
+    var items = currentConcern === "all"
+      ? YAKUZEN
+      : YAKUZEN.filter(function (f) { return f.tags.indexOf(currentConcern) !== -1; });
+    var cont = document.getElementById("yakuzen-list");
+    if (!items.length) {
+      cont.innerHTML = '<p class="yk-empty">該当する食材がありません。</p>';
+      return;
+    }
+    var html = "";
+    YK_CATS.forEach(function (cat) {
+      var group = items.filter(function (f) { return f.cat === cat; });
+      if (!group.length) return;
+      html += '<p class="section-label yk-cat">' + esc(cat) + '</p><div class="veg-list">';
+      html += group.map(function (f) {
+        var tone = seiTone(f.sei);
+        return (
+          '<button class="veg-row" type="button" data-yakuzen="' + esc(f.name) + '">' +
+            '<span class="ys-badge ' + tone + '">' + esc(f.sei) + '</span>' +
+            '<span class="veg-row-main">' +
+              '<span class="veg-row-name">' + esc(f.name) + '</span>' +
+              '<span class="veg-row-sub">' + esc(f.kou) + '</span>' +
+            '</span>' +
+            '<span class="row-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>' +
+          '</button>'
+        );
+      }).join("");
+      html += "</div>";
+    });
+    cont.innerHTML = html;
+    cont.querySelectorAll("[data-yakuzen]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        openYakuzen(btn.getAttribute("data-yakuzen"));
+      });
+    });
+  }
+
+  function renderYakuzen() {
+    renderYakuzenBanner();
+    renderYakuzenChips();
+    renderYakuzenList();
+  }
+
+  function openYakuzen(name) {
+    var f = null;
+    for (var i = 0; i < YAKUZEN.length; i++) {
+      if (YAKUZEN[i].name === name) { f = YAKUZEN[i]; break; }
+    }
+    if (!f) return;
+    document.getElementById("sheet-name").textContent = f.name;
+    var tag = document.getElementById("sheet-family");
+    tag.textContent = f.cat;
+    tag.style.background = toneColorVar(seiTone(f.sei));
+    document.getElementById("sheet-body").innerHTML =
+      '<dl class="fact-grid">' +
+        '<div class="fact-row"><dt>五性</dt><dd>' + esc(f.sei) + '</dd></div>' +
+        '<div class="fact-row"><dt>五味</dt><dd>' + esc(f.mi) + '</dd></div>' +
+        '<div class="fact-row"><dt>帰経</dt><dd>' + esc(f.kei) + '</dd></div>' +
+      '</dl>' +
+      '<p class="note-block note-tip"><span class="note-label">効能</span>' + esc(f.kou) + '</p>' +
+      '<p class="note-block note-watch"><span class="note-label">向く人</span>' + esc(f.muku) + '</p>' +
+      (f.chui && f.chui !== "—"
+        ? '<p class="note-block note-offgrade"><span class="note-label">注意</span>' + esc(f.chui) + '</p>'
+        : '') +
+      '<p class="yk-disclaimer">' + esc(YK_DISCLAIMER) + '</p>';
+    document.getElementById("sheet-overlay").classList.add("is-open");
+  }
+
   var HEADER_TEXT = {
     home: ["やさい手帳", "季節の野菜を育てよう"],
     growing: ["栽培中の野菜", "育てている野菜をチェック"],
-    tips: ["共通の栽培のコツ", "どの野菜にも役立つ基本"]
+    tips: ["共通の栽培のコツ", "どの野菜にも役立つ基本"],
+    yakuzen: ["薬膳", "食材の性質と効能"]
   };
 
   document.querySelectorAll(".nav-btn").forEach(function (btn) {
@@ -1440,6 +1678,7 @@
       document.getElementById("header-title").textContent = HEADER_TEXT[currentNav][0];
       document.getElementById("header-sub").textContent = HEADER_TEXT[currentNav][1];
       if (currentNav === "growing") renderGrowingList();
+      if (currentNav === "yakuzen") renderYakuzen();
     });
   });
 
@@ -1447,6 +1686,7 @@
   renderHomeList();
   renderGrowingList();
   renderTips();
+  renderYakuzen();
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
