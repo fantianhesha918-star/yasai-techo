@@ -365,7 +365,7 @@
   .veg-row {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     width: 100%;
     text-align: left;
     background: var(--card-bg);
@@ -376,14 +376,12 @@
     cursor: pointer;
   }
   .veg-row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .monogram {
+  .season-bar {
     flex: 0 0 auto;
-    width: 42px; height: 42px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700;
-    font-size: 1.05rem;
-    color: #fff;
+    width: 4px;
+    align-self: stretch;
+    min-height: 30px;
+    border-radius: 999px;
   }
   .veg-row-main { flex: 1 1 auto; min-width: 0; }
   .veg-row-name {
@@ -439,11 +437,7 @@
   }
   .grid-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .grid-card-top { display: flex; align-items: center; gap: 7px; min-width: 0; }
-  .grid-card .monogram {
-    width: 26px; height: 26px;
-    border-radius: 8px;
-    font-size: 0.8rem;
-  }
+  .grid-card .season-bar { min-height: 16px; }
   .grid-card .ys-badge {
     min-width: 0;
     font-size: 0.68rem;
@@ -2086,7 +2080,7 @@
     }
     return (
       '<button class="veg-row" type="button" data-open="' + esc(veg.id) + '">' +
-        '<span class="monogram" style="background:' + color + '">' + esc(veg.name.charAt(0)) + '</span>' +
+        '<span class="season-bar" style="background:' + color + '"></span>' +
         '<span class="veg-row-main">' +
           '<span class="veg-row-name">' + esc(veg.name) +
             (growing ? '<span class="grow-dot" title="栽培中"></span>' : '') +
@@ -2106,7 +2100,7 @@
     return (
       '<button class="grid-card" type="button" data-open="' + esc(veg.id) + '">' +
         '<span class="grid-card-top">' +
-          '<span class="monogram" style="background:' + color + '">' + esc(veg.name.charAt(0)) + '</span>' +
+          '<span class="season-bar" style="background:' + color + '"></span>' +
           '<span class="grid-card-name">' + esc(veg.name) +
             (growing ? '<span class="grow-dot" title="栽培中"></span>' : '') +
           '</span>' +
@@ -2382,7 +2376,7 @@
       var period = (r.plantedAt ? mdLabel(r.plantedAt) : "?") + "〜" + (r.endedAt ? mdLabel(r.endedAt) : "?");
       var hn = r.harvests ? r.harvests.length : 0;
       return '<button class="veg-row" type="button" data-history="' + esc(r.id) + '">' +
-        '<span class="monogram" style="background:' + color + '">' + esc((r.vegName || "?").charAt(0)) + '</span>' +
+        '<span class="season-bar" style="background:' + color + '"></span>' +
         '<span class="veg-row-main">' +
           '<span class="veg-row-name">' + esc(r.vegName || "?") + '</span>' +
           '<span class="veg-row-sub">' + esc(period) + '｜収穫' + hn + '回・水やり' + (r.waterCount || 0) + '回</span>' +
