@@ -1,5 +1,6 @@
 // キャッシュ内容を変えたら CACHE_NAME を必ず更新すること（バージョンを上げないと利用者に更新が届かない）
-var CACHE_NAME = "yasai-techo-v28";
+var CACHE_NAME = "yasai-techo-v29";
+var FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 var ASSETS = [
   "./",
   "./index.html",
@@ -32,10 +33,16 @@ self.addEventListener("activate", function (event) {
 self.addEventListener("fetch", function (event) {
   if (event.request.method !== "GET") return;
 
+  var isFont = FONT_HOSTS.indexOf(new URL(event.request.url).host) !== -1;
+
   event.respondWith(
     caches.match(event.request).then(function (cached) {
       var networkFetch = fetch(event.request).then(function (response) {
-        if (response && response.status === 200 && response.type === "basic") {
+        var ok = response && (
+          (response.status === 200 && response.type === "basic") ||
+          (isFont && (response.ok || response.type === "opaque"))
+        );
+        if (ok) {
           var clone = response.clone();
           caches.open(CACHE_NAME).then(function (cache) { cache.put(event.request, clone); });
         }
