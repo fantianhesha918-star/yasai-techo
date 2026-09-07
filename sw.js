@@ -1,10 +1,13 @@
 // キャッシュ内容を変えたら CACHE_NAME を必ず更新すること（バージョンを上げないと利用者に更新が届かない）
-var CACHE_NAME = "yasai-techo-v14";
+var CACHE_NAME = "yasai-techo-v15";
 var ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./icon-180.png"
+  "./icon-180.png",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./icon-512-maskable.png"
 ];
 
 self.addEventListener("install", function (event) {
