@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<meta charset="utf-8" />
 <title>やさい手帳</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#4d7a3f" />
@@ -665,6 +666,72 @@
   .end-grow-choice:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .history-hd { margin-top: 22px; }
 
+  /* 写真 */
+  .photo-block { margin-bottom: 16px; }
+  .photo-head { margin-bottom: 8px; }
+  .photo-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .photo-loading { font-size: 0.8rem; color: var(--ink-soft); padding: 6px 0; }
+  .photo-thumb {
+    position: relative;
+    flex: 0 0 auto;
+    width: 84px; height: 84px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .photo-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+  }
+  .photo-del {
+    position: absolute;
+    top: 2px; right: 2px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(20,20,12,0.55);
+    color: #fff;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-family: inherit;
+  }
+  .photo-add-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 0.83rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .photo-viewer {
+    position: absolute;
+    inset: 0;
+    background: rgba(10,10,8,0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 40;
+    padding: 20px;
+  }
+  .photo-viewer.is-open { opacity: 1; pointer-events: auto; }
+  .photo-viewer img { max-width: 100%; max-height: 100%; border-radius: 8px; }
+
   .fact-grid {
     display: grid;
     grid-template-columns: 5.6em 1fr;
@@ -1116,6 +1183,8 @@
     </div>
   </div>
 
+  <div class="photo-viewer" id="photo-viewer"></div>
+
 </div>
 
 <script>
@@ -1274,6 +1343,109 @@
   }
   function saveHistory(list) {
     try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); } catch (e) {}
+  }
+
+  /* ===== 写真（IndexedDB） ===== */
+  var IDB_STORE = "photos";
+  var _photoDBPromise = null;
+  function photoDB() {
+    if (_photoDBPromise) return _photoDBPromise;
+    _photoDBPromise = new Promise(function (resolve, reject) {
+      if (!window.indexedDB) { reject(new Error("no indexedDB")); return; }
+      var req = indexedDB.open("yasai-techo-photos", 1);
+      req.onupgradeneeded = function () {
+        var db = req.result;
+        if (!db.objectStoreNames.contains(IDB_STORE)) {
+          var os = db.createObjectStore(IDB_STORE, { keyPath: "id" });
+          os.createIndex("vegId", "vegId", { unique: false });
+        }
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error); };
+    });
+    return _photoDBPromise;
+  }
+  function idbPut(rec) {
+    return photoDB().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction(IDB_STORE, "readwrite");
+        tx.objectStore(IDB_STORE).put(rec);
+        tx.oncomplete = function () { res(); };
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+  function idbDelete(id) {
+    return photoDB().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction(IDB_STORE, "readwrite");
+        tx.objectStore(IDB_STORE).delete(id);
+        tx.oncomplete = function () { res(); };
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+  function idbGetByVeg(vegId) {
+    return photoDB().then(function (db) {
+      return new Promise(function (res, rej) {
+        var out = [];
+        var tx = db.transaction(IDB_STORE, "readonly");
+        tx.objectStore(IDB_STORE).index("vegId").openCursor(IDBKeyRange.only(vegId)).onsuccess = function (e) {
+          var cur = e.target.result;
+          if (cur) { out.push(cur.value); cur.continue(); }
+          else res(out.sort(function (a, b) { return (a.at || "") < (b.at || "") ? -1 : 1; }));
+        };
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+  function idbAll() {
+    return photoDB().then(function (db) {
+      return new Promise(function (res, rej) {
+        var out = [];
+        var tx = db.transaction(IDB_STORE, "readonly");
+        tx.objectStore(IDB_STORE).openCursor().onsuccess = function (e) {
+          var cur = e.target.result;
+          if (cur) { out.push(cur.value); cur.continue(); }
+          else res(out);
+        };
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+  function idbClear() {
+    return photoDB().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction(IDB_STORE, "readwrite");
+        tx.objectStore(IDB_STORE).clear();
+        tx.oncomplete = function () { res(); };
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+  function addPhotoFromFile(vegId, file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var img = new Image();
+        img.onload = function () {
+          var max = 1200, w = img.width, h = img.height;
+          if (w > h && w > max) { h = Math.round(h * max / w); w = max; }
+          else if (h >= w && h > max) { w = Math.round(w * max / h); h = max; }
+          var cv = document.createElement("canvas");
+          cv.width = w; cv.height = h;
+          cv.getContext("2d").drawImage(img, 0, 0, w, h);
+          var dataUrl;
+          try { dataUrl = cv.toDataURL("image/jpeg", 0.8); }
+          catch (e) { reject(e); return; }
+          idbPut({ id: recordUid(), vegId: vegId, at: new Date().toISOString(), dataUrl: dataUrl }).then(resolve, reject);
+        };
+        img.onerror = function () { reject(new Error("画像を読み込めません")); };
+        img.src = reader.result;
+      };
+      reader.onerror = function () { reject(reader.error); };
+      reader.readAsDataURL(file);
+    });
   }
 
   var notesData = loadRecordMap(NOTES_KEY);
@@ -1554,7 +1726,7 @@
         if (stageCheckSet.has(stageKey(vegId, i))) stagesDone.push(i);
       });
     }
-    historyData.unshift({
+    var rec = {
       id: recordUid(),
       vegId: vegId,
       vegName: veg ? veg.name : vegId,
@@ -1564,12 +1736,22 @@
       waterCount: (g.waterLog || []).length,
       notes: (notesData[vegId] || []).slice(),
       harvests: (harvestData[vegId] || []).slice(),
-      stagesDone: stagesDone
-    });
+      stagesDone: stagesDone,
+      photoKey: null
+    };
+    historyData.unshift(rec);
     saveHistory(historyData);
-    discardCultivation(vegId);
+    // 写真を履歴側のキーに付け替えて残す
+    idbGetByVeg(vegId).then(function (photos) {
+      if (!photos.length) return;
+      rec.photoKey = "hist:" + rec.id;
+      Promise.all(photos.map(function (p) { p.vegId = rec.photoKey; return idbPut(p); }))
+        .then(function () { saveHistory(historyData); renderGrowingList(); });
+    }, function () {});
+    // localStorage 側をクリア（写真は付け替え済みなので残す）
+    clearActiveCultivation(vegId);
   }
-  function discardCultivation(vegId) {
+  function clearActiveCultivation(vegId) {
     var veg = findVeg(vegId);
     delete growingData[vegId]; saveGrowingData(growingData);
     delete notesData[vegId]; saveRecordMap(NOTES_KEY, notesData);
@@ -1578,6 +1760,12 @@
       veg.stages.forEach(function (s, i) { stageCheckSet.delete(stageKey(vegId, i)); });
       saveStageChecks(Array.from(stageCheckSet));
     }
+  }
+  function discardCultivation(vegId) {
+    clearActiveCultivation(vegId);
+    idbGetByVeg(vegId).then(function (photos) {
+      photos.forEach(function (p) { idbDelete(p.id); });
+    }, function () {});
   }
   function showEndGrowChoice(veg) {
     var blk = document.getElementById("end-grow-block");
@@ -1642,10 +1830,28 @@
             esc(niceDate(e.date)) + '</span><span class="record-entry-text">' + esc(e.text) + '</span></div></div>';
         }).join("") + '</div>';
     }
+    if (r.photoKey) {
+      body += '<p class="section-label" style="margin:14px 0 8px;">写真</p>' +
+        '<div class="photo-strip" id="hist-photo-strip"><span class="photo-loading">読み込み中…</span></div>';
+    }
     body += '<button class="settings-btn" id="history-del" type="button" style="margin-top:18px;border-color:var(--offgrade-ink);color:var(--offgrade-ink);">この記録を削除</button>';
     document.getElementById("sheet-body").innerHTML = body;
+    if (r.photoKey) {
+      idbGetByVeg(r.photoKey).then(function (list) {
+        var strip = document.getElementById("hist-photo-strip");
+        if (!strip) return;
+        if (!list.length) { strip.innerHTML = ""; return; }
+        strip.innerHTML = photoStripHTML(list, false);
+        bindPhotoStrip(strip, false);
+      }, function () {});
+    }
     document.getElementById("history-del").addEventListener("click", function () {
-      if (!window.confirm("この「育てた記録」を削除します。よろしいですか？")) return;
+      if (!window.confirm("この「育てた記録」を削除します。写真も削除されます。よろしいですか？")) return;
+      if (r.photoKey) {
+        idbGetByVeg(r.photoKey).then(function (photos) {
+          photos.forEach(function (p) { idbDelete(p.id); });
+        }, function () {});
+      }
       historyData = historyData.filter(function (x) { return x.id !== recId; });
       saveHistory(historyData);
       closeDetail();
@@ -1908,6 +2114,72 @@
     bindWaterBlock(id);
   }
 
+  function viewPhoto(src) {
+    var ov = document.getElementById("photo-viewer");
+    if (!ov) return;
+    ov.innerHTML = '<img src="' + src + '" alt="" />';
+    ov.classList.add("is-open");
+  }
+  function closePhotoViewer() {
+    var ov = document.getElementById("photo-viewer");
+    if (ov) { ov.classList.remove("is-open"); ov.innerHTML = ""; }
+  }
+  function photoStripHTML(list, editable) {
+    if (!list.length) return '<span class="photo-loading">まだ写真がありません</span>';
+    return list.map(function (p) {
+      return '<span class="photo-thumb"><img src="' + p.dataUrl + '" alt="写真 ' + esc(mdLabel((p.at || "").slice(0, 10))) + '" data-photo-view="1" />' +
+        (editable ? '<button type="button" class="photo-del" data-photo-del="' + esc(p.id) + '" aria-label="削除">×</button>' : '') +
+      '</span>';
+    }).join("");
+  }
+  function bindPhotoStrip(strip, editable, vegId, refreshFn) {
+    strip.querySelectorAll("[data-photo-view]").forEach(function (im) {
+      im.addEventListener("click", function () { viewPhoto(im.getAttribute("src")); });
+    });
+    if (!editable) return;
+    strip.querySelectorAll("[data-photo-del]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (!window.confirm("この写真を削除しますか？")) return;
+        idbDelete(b.getAttribute("data-photo-del")).then(refreshFn);
+      });
+    });
+  }
+  function renderPhotoStrip(vegId) {
+    var strip = document.getElementById("photo-strip");
+    if (!strip) return;
+    idbGetByVeg(vegId).then(function (list) {
+      var s = document.getElementById("photo-strip");
+      if (!s) return;
+      s.innerHTML = photoStripHTML(list, true);
+      bindPhotoStrip(s, true, vegId, function () { renderPhotoStrip(vegId); });
+    }, function () {
+      var s = document.getElementById("photo-strip");
+      if (s) s.innerHTML = '<span class="photo-loading">写真を利用できません</span>';
+    });
+  }
+  function renderPhotoBlock(vegId) {
+    var host = document.getElementById("photo-block");
+    if (!host) return;
+    host.innerHTML =
+      '<div class="photo-head"><span class="section-label" style="margin:0;">写真</span></div>' +
+      '<div class="photo-strip" id="photo-strip"><span class="photo-loading">読み込み中…</span></div>' +
+      '<label class="photo-add-btn">写真を追加<input type="file" id="photo-input" accept="image/*" hidden /></label>';
+    document.getElementById("photo-input").addEventListener("change", function (e) {
+      var file = e.target.files && e.target.files[0];
+      e.target.value = "";
+      if (!file) return;
+      var strip = document.getElementById("photo-strip");
+      if (strip) strip.innerHTML = '<span class="photo-loading">追加中…</span>';
+      addPhotoFromFile(vegId, file).then(function () {
+        renderPhotoStrip(vegId);
+      }, function () {
+        var s = document.getElementById("photo-strip");
+        if (s) s.innerHTML = '<span class="photo-loading">追加できませんでした</span>';
+      });
+    });
+    renderPhotoStrip(vegId);
+  }
+
   function findYakuzenForVeg(veg) {
     var hn = toHira(veg.name);
     for (var i = 0; i < YAKUZEN.length; i++) {
@@ -1964,6 +2236,7 @@
       (growing ? '<div class="end-grow-block" id="end-grow-block"></div>' : '') +
       plantedBlockHTML +
       waterHTML +
+      (growing ? '<div class="photo-block" id="photo-block"></div>' : '') +
       recordsHTML +
       '<dl class="fact-grid">' + factsHTML + '</dl>' +
       stagesHTML(veg) +
@@ -2003,7 +2276,7 @@
     });
 
     bindRecordForms(veg.id);
-    if (growing) bindWaterBlock(veg.id);
+    if (growing) { bindWaterBlock(veg.id); renderPhotoBlock(veg.id); }
 
     document.getElementById("sheet-overlay").classList.add("is-open");
     focusSheet();
@@ -2052,8 +2325,12 @@
   document.getElementById("sheet-overlay").addEventListener("click", function (e) {
     if (e.target === this) closeDetail();
   });
+  document.getElementById("photo-viewer").addEventListener("click", closePhotoViewer);
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") closeDetail();
+    if (e.key !== "Escape") return;
+    var pv = document.getElementById("photo-viewer");
+    if (pv && pv.classList.contains("is-open")) { closePhotoViewer(); return; }
+    closeDetail();
   });
 
   /* ===== 薬膳タブ ===== */
@@ -2302,7 +2579,7 @@
           '<button class="settings-btn" id="backup-copy" type="button">コピー</button>' +
           '<button class="settings-btn" id="backup-save" type="button">ファイルに保存</button>' +
         '</div>' +
-        '<p class="settings-note" id="backup-msg">コピーしてメモアプリやメールに貼り付けて保管してください。</p>' +
+        '<p class="settings-note" id="backup-msg">「コピー」は文字データのみ。「ファイルに保存」は写真も含めて保存します。</p>' +
       '</div>' +
       '<div class="settings-block">' +
         '<p class="settings-h">読み込み（復元）</p>' +
@@ -2328,22 +2605,27 @@
     });
     document.getElementById("backup-save").addEventListener("click", function () {
       var msg = document.getElementById("backup-msg");
-      try {
-        var blob = new Blob([document.getElementById("backup-out").value], { type: "application/json" });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement("a");
-        var d = new Date();
-        var stamp = d.getFullYear() + ("0" + (d.getMonth() + 1)).slice(-2) + ("0" + d.getDate()).slice(-2);
-        a.href = url;
-        a.download = "yasai-techo-backup-" + stamp + ".json";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
-        msg.textContent = "ファイルを保存しました。";
-      } catch (e) {
-        msg.textContent = "この環境ではファイル保存ができません。「コピー」をお使いください。";
-      }
+      msg.textContent = "写真を含めて準備中…";
+      var full = collectBackup();
+      idbAll().then(function (photos) { full.photos = photos; }, function () {})
+        .then(function () {
+          try {
+            var blob = new Blob([JSON.stringify(full)], { type: "application/json" });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            var d = new Date();
+            var stamp = d.getFullYear() + ("0" + (d.getMonth() + 1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+            a.href = url;
+            a.download = "yasai-techo-backup-" + stamp + ".json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+            msg.textContent = "ファイルを保存しました（写真" + (full.photos ? full.photos.length : 0) + "枚を含む）。";
+          } catch (e) {
+            msg.textContent = "この環境ではファイル保存ができません。「コピー」をお使いください。";
+          }
+        });
     });
     document.getElementById("restore-run").addEventListener("click", function () {
       var msg = document.getElementById("restore-msg");
@@ -2354,8 +2636,17 @@
       if (!window.confirm("今の記録をすべて上書きします。よろしいですか？")) return;
       var err = applyBackup(obj);
       if (err) { msg.textContent = err; return; }
-      msg.textContent = "読み込みました。画面を更新します…";
-      setTimeout(function () { location.reload(); }, 800);
+      msg.textContent = "読み込み中…";
+      var photosPromise = Promise.resolve();
+      if (obj.photos && obj.photos.length) {
+        photosPromise = idbClear().then(function () {
+          return Promise.all(obj.photos.map(function (p) { return idbPut(p); }));
+        }).catch(function () {});
+      }
+      photosPromise.then(function () {
+        msg.textContent = "読み込みました。画面を更新します…";
+        setTimeout(function () { location.reload(); }, 800);
+      });
     });
 
     document.getElementById("sheet-overlay").classList.add("is-open");
