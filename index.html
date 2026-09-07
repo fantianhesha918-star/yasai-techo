@@ -1380,6 +1380,9 @@
           <p><span class="g-term">避けたい組み合わせ</span>強く冷やすものどうしを大量に、は不調のもと。例：柿＋かに、柿＋緑茶。脂っこいもの＋甘いもの＋生もの、も胃腸に重い。</p>
         </div>
       </details>
+      <div class="search-row">
+        <input type="search" id="yakuzen-search" class="search-input" placeholder="食材名で検索（例：なす）" autocomplete="off" />
+      </div>
       <div class="chip-row" id="yakuzen-chips"></div>
       <div id="yakuzen-list"></div>
       <p class="yk-disclaimer">薬膳・東洋医学の伝統的な考え方に基づく一般的な分類です。体質や体調には個人差があり、効果を保証するものではありません。持病がある方・妊娠中の方・薬を服用中の方は医師や専門家にご相談ください。</p>
@@ -1697,6 +1700,7 @@
   var currentSearch = "";
   var currentNav = "home";
   var currentConcern = "all";
+  var currentYkSearch = "";
   var lastSheetTrigger = null;
 
   function esc(s) {
@@ -2674,6 +2678,14 @@
     renderHomeList();
   });
 
+  var ykSearchEl = document.getElementById("yakuzen-search");
+  if (ykSearchEl) {
+    ykSearchEl.addEventListener("input", function (e) {
+      currentYkSearch = e.target.value.trim();
+      renderYakuzenList();
+    });
+  }
+
   document.getElementById("sheet-close").addEventListener("click", closeDetail);
   document.getElementById("settings-btn").addEventListener("click", openSettings);
   document.getElementById("sheet-overlay").addEventListener("click", function (e) {
@@ -2871,6 +2883,14 @@
     var items = currentConcern === "all"
       ? YAKUZEN
       : YAKUZEN.filter(function (f) { return f.tags.indexOf(currentConcern) !== -1; });
+    if (currentYkSearch) {
+      var q = toHira(currentYkSearch);
+      items = items.filter(function (f) {
+        return toHira(f.name).indexOf(q) !== -1 ||
+          toHira(f.kou).indexOf(q) !== -1 ||
+          f.kei.indexOf(currentYkSearch) !== -1;
+      });
+    }
     var cont = document.getElementById("yakuzen-list");
     if (!items.length) {
       cont.innerHTML = '<p class="yk-empty">該当する食材がありません。</p>';
