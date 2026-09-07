@@ -965,6 +965,28 @@
   }
   .record-add-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+  .memo-cat-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .memo-cat-label { font-size: 0.72rem; color: var(--ink-soft); margin-right: 2px; }
+  .memo-cat-chip {
+    font: inherit; font-size: 0.76rem;
+    padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--card-bg); color: var(--ink-soft);
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+  }
+  .memo-cat-chip.is-active {
+    background: var(--accent); border-color: var(--accent);
+    color: var(--accent-contrast); font-weight: 700;
+  }
+  .memo-cat-badge {
+    display: inline-block; vertical-align: 1px;
+    font-size: 0.68rem; font-weight: 700;
+    padding: 1px 6px; border-radius: 4px; margin-right: 6px;
+    background: var(--watch-soft); color: var(--watch-ink);
+  }
+  .memo-cat-badge.cat-gaichu { background: var(--offgrade-soft); color: var(--offgrade-ink); }
+  .memo-cat-badge.cat-furikaeri { background: rgba(77,122,63,0.12); color: var(--accent); }
+  .memo-cat-badge.cat-tenki { background: var(--watch-soft); color: var(--watch-ink); }
+
   /* ===== 今月の作業パネル ===== */
   .month-panel {
     background: var(--card-bg);
@@ -2003,7 +2025,8 @@
       body += '<p class="section-label" style="margin:14px 0 8px;">作業メモ・日記</p><div class="record-list">' +
         sortByDateDesc(r.notes).map(function (e) {
           return '<div class="record-entry"><div class="record-entry-body"><span class="record-entry-date">' +
-            esc(niceDate(e.date)) + '</span><span class="record-entry-text">' + esc(e.text) + '</span></div></div>';
+            esc(niceDate(e.date)) + '</span>' + memoCatBadgeHTML(e.cat) +
+            '<span class="record-entry-text">' + esc(e.text) + '</span></div></div>';
         }).join("") + '</div>';
     }
     if (r.photoKey) {
@@ -2096,6 +2119,21 @@
     '</button>';
   }
 
+  var MEMO_CATS = [
+    ["sagyou", "作業"], ["mizu", "水やり"], ["gaichu", "病害虫"],
+    ["tenki", "天気"], ["seiiku", "生育"], ["furikaeri", "振り返り"]
+  ];
+  function memoCatLabel(key) {
+    for (var i = 0; i < MEMO_CATS.length; i++) if (MEMO_CATS[i][0] === key) return MEMO_CATS[i][1];
+    return "";
+  }
+  function memoCatBadgeHTML(cat) {
+    if (!cat) return "";
+    var label = memoCatLabel(cat);
+    if (!label) return "";
+    return '<span class="memo-cat-badge cat-' + esc(cat) + '">' + esc(label) + '</span>';
+  }
+
   function memoEntriesHTML(id) {
     var list = notesData[id] || [];
     if (!list.length) return '<p class="record-empty">まだメモがありません。</p>';
@@ -2103,6 +2141,7 @@
       return '<div class="record-entry" data-entry-id="' + esc(e.id) + '">' +
         '<div class="record-entry-body">' +
           '<span class="record-entry-date">' + esc(niceDate(e.date)) + '</span>' +
+          memoCatBadgeHTML(e.cat) +
           '<span class="record-entry-text">' + esc(e.text) + '</span>' +
         '</div>' +
         recordDelBtnHTML() +
@@ -2138,6 +2177,12 @@
       '<form class="record-form" id="memo-form">' +
         '<input type="date" id="memo-date" class="record-input" value="' + todayInputValue() + '" />' +
         '<textarea id="memo-text" class="record-input record-textarea" rows="2" placeholder="育ちの様子・作業したこと・気づき"></textarea>' +
+        '<div class="memo-cat-row" id="memo-cat-row">' +
+          '<span class="memo-cat-label">種類（任意）</span>' +
+          MEMO_CATS.map(function (c) {
+            return '<button type="button" class="memo-cat-chip" data-cat="' + c[0] + '">' + esc(c[1]) + '</button>';
+          }).join("") +
+        '</div>' +
         '<button type="submit" class="record-add-btn">記録する</button>' +
       '</form>' +
     '</div>';
@@ -2212,15 +2257,28 @@
   function bindRecordForms(id) {
     var memoForm = document.getElementById("memo-form");
     if (memoForm) {
+      var catRow = document.getElementById("memo-cat-row");
+      if (catRow) {
+        catRow.querySelectorAll(".memo-cat-chip").forEach(function (ch) {
+          ch.addEventListener("click", function () {
+            var was = ch.classList.contains("is-active");
+            catRow.querySelectorAll(".memo-cat-chip").forEach(function (x) { x.classList.remove("is-active"); });
+            if (!was) ch.classList.add("is-active");
+          });
+        });
+      }
       memoForm.addEventListener("submit", function (e) {
         e.preventDefault();
         var date = document.getElementById("memo-date").value || todayInputValue();
         var text = document.getElementById("memo-text").value.trim();
         if (!text) return;
+        var activeChip = memoForm.querySelector(".memo-cat-chip.is-active");
+        var cat = activeChip ? activeChip.getAttribute("data-cat") : "";
         if (!notesData[id]) notesData[id] = [];
-        notesData[id].push({ id: recordUid(), date: date, text: text });
+        notesData[id].push({ id: recordUid(), date: date, text: text, cat: cat });
         saveRecordMap(NOTES_KEY, notesData);
         document.getElementById("memo-text").value = "";
+        memoForm.querySelectorAll(".memo-cat-chip").forEach(function (x) { x.classList.remove("is-active"); });
         refreshMemo(id);
       });
       refreshMemo(id);
