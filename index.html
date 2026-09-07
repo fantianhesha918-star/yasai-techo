@@ -1059,6 +1059,21 @@
   }
   .yk-empty { text-align: center; color: var(--ink-soft); font-size: 0.86rem; padding: 40px 20px; }
 
+  .yk-shun { margin: 0 0 2px; }
+  .yk-shun-label { font-size: 0.78rem; font-weight: 700; color: var(--ink-soft); margin: 0 2px 6px; }
+  .yk-shun-row {
+    display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px;
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  .yk-shun-row::-webkit-scrollbar { display: none; }
+  .yk-shun-chip {
+    flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px;
+    font: inherit; font-size: 0.8rem; padding: 5px 11px 5px 6px;
+    border-radius: 999px; border: 1px solid var(--line); background: var(--card-bg);
+    color: var(--ink); cursor: pointer; white-space: nowrap;
+    -webkit-appearance: none; appearance: none;
+  }
+  .yk-shun-chip .ys-badge { font-size: 0.66rem; }
   .yk-guide-hd { margin: 14px 2px 8px; }
   .yk-guide {
     background: var(--card-bg);
@@ -1165,6 +1180,7 @@
     <!-- 薬膳 -->
     <section class="view" data-view="yakuzen">
       <div id="yakuzen-banner" class="yk-banner"></div>
+      <div id="yakuzen-shun" class="yk-shun"></div>
       <p class="section-label yk-guide-hd">薬膳の基礎知識（タップで開く）</p>
       <details class="yk-guide" id="yakuzen-guide" data-guide="kihon">
         <summary>五性・五味・帰経ってなに？</summary>
@@ -2643,8 +2659,40 @@
     });
   }
 
+  function seasonWordsForMonth(m) {
+    if (m >= 3 && m <= 5) return ["春"];
+    if (m === 6) return ["梅雨", "初夏"];
+    if (m >= 7 && m <= 8) return ["夏"];
+    if (m >= 9 && m <= 11) return ["秋"];
+    return ["冬"];
+  }
+  function renderYakuzenShun() {
+    var m = new Date().getMonth() + 1;
+    var words = seasonWordsForMonth(m);
+    var list = YAKUZEN.filter(function (f) {
+      for (var i = 0; i < words.length; i++) {
+        if (f.muku.indexOf(words[i]) !== -1) return true;
+      }
+      return false;
+    });
+    var cont = document.getElementById("yakuzen-shun");
+    if (!list.length) { cont.innerHTML = ""; return; }
+    cont.innerHTML =
+      '<p class="yk-shun-label">今月の食材（' + m + '月）</p>' +
+      '<div class="yk-shun-row">' +
+      list.map(function (f) {
+        return '<button type="button" class="yk-shun-chip" data-yakuzen="' + esc(f.name) + '">' +
+          '<span class="ys-badge ' + seiTone(f.sei) + '">' + esc(f.sei) + '</span>' + esc(f.name) + '</button>';
+      }).join("") +
+      '</div>';
+    cont.querySelectorAll("[data-yakuzen]").forEach(function (b) {
+      b.addEventListener("click", function () { openYakuzen(b.getAttribute("data-yakuzen")); });
+    });
+  }
+
   function renderYakuzen() {
     renderYakuzenBanner();
+    renderYakuzenShun();
     renderYakuzenChips();
     renderYakuzenList();
   }
