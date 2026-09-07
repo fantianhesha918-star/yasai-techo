@@ -275,6 +275,7 @@
     flex: 1 1 auto;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
     padding: 14px 0 20px;
   }
   .view { display: none; padding: 0 18px; }
@@ -1302,8 +1303,50 @@
   .nav-btn.is-active { color: var(--accent); font-weight: 700; }
   .nav-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
+  /* ===== 押した感・登場アニメーション ===== */
+  .grid-card, .veg-row, .tip-card, .chip, .nav-btn, .care-chip, .yk-shun-chip,
+  .settings-btn, .memo-cat-chip, .yk-check-jump, .review-memo, .yk-jump-veg,
+  button.note-block.yk-jump, .water-btn, .record-add-btn, .photo-add-btn {
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
+      background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+  .grid-card:active, .veg-row:active, .tip-card:active, .chip:active, .care-chip:active,
+  .yk-shun-chip:active, .settings-btn:active, .memo-cat-chip:active, .yk-check-jump:active,
+  .review-memo:active, .yk-jump-veg:active, button.note-block.yk-jump:active,
+  .water-btn:active, .record-add-btn:active, .photo-add-btn:active {
+    transform: scale(0.978);
+  }
+  .grid-card:active, .veg-row:active, .tip-card:active { box-shadow: var(--shadow-raised); }
+  .nav-btn:active { transform: scale(0.94); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(7px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* .just-shown はタブ切り替え時だけJSが付与（ライブ絞り込みでは再生しない） */
+    .view.just-shown .grid-card,
+    .view.just-shown .veg-row,
+    .view.just-shown .tip-card {
+      animation: cardIn 0.34s var(--ease) both;
+    }
+    .view.just-shown .grid-card:nth-child(1),
+    .view.just-shown .veg-row:nth-child(1) { animation-delay: 0.01s; }
+    .view.just-shown .grid-card:nth-child(2) { animation-delay: 0.03s; }
+    .view.just-shown .grid-card:nth-child(3),
+    .view.just-shown .veg-row:nth-child(2) { animation-delay: 0.05s; }
+    .view.just-shown .grid-card:nth-child(4) { animation-delay: 0.07s; }
+    .view.just-shown .grid-card:nth-child(5),
+    .view.just-shown .veg-row:nth-child(3) { animation-delay: 0.09s; }
+    .view.just-shown .grid-card:nth-child(6) { animation-delay: 0.11s; }
+    .view.just-shown .grid-card:nth-child(n+7),
+    .view.just-shown .veg-row:nth-child(n+4) { animation-delay: 0.13s; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .detail-sheet, .sheet-overlay { transition: none; }
+    .app-body { scroll-behavior: auto; }
+    * { animation-duration: 0.001ms !important; animation-delay: 0s !important; }
   }
 </style>
 
@@ -3341,8 +3384,18 @@
       document.getElementById("header-sub").textContent = HEADER_TEXT[currentNav][1];
       if (currentNav === "growing") renderGrowingList();
       if (currentNav === "yakuzen") renderYakuzen();
+      flashJustShown();
     });
   });
+
+  function flashJustShown() {
+    var av = document.querySelector(".view.is-active");
+    if (!av) return;
+    av.classList.remove("just-shown");
+    void av.offsetWidth;
+    av.classList.add("just-shown");
+    window.setTimeout(function () { av.classList.remove("just-shown"); }, 700);
+  }
 
   renderChips();
   renderHomeList();
@@ -3350,6 +3403,7 @@
   renderTips();
   renderYakuzen();
   bindYakuzenCheck();
+  flashJustShown();
 
   (function () {
     var guides = document.querySelectorAll(".yk-guide[data-guide]");
