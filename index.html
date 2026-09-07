@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#4d7a3f" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="やさい手帳" />
 <link rel="manifest" href="manifest.json" />
 <link rel="apple-touch-icon" href="icon-180.png" />
@@ -135,6 +135,8 @@
     max-width: 430px;
     height: 100vh;
     height: 100dvh;
+    /* iPhone のステータスバー/Dynamic Island 分を確保（standalone時のみ非0） */
+    padding-top: env(safe-area-inset-top, 0px);
     background: var(--app-bg);
     display: flex;
     flex-direction: column;
@@ -145,17 +147,16 @@
     .app-frame {
       min-height: 780px;
       height: 844px;
+      padding-top: 0;
       border-radius: 34px;
       box-shadow: var(--shadow-frame);
       border: 1px solid rgba(0,0,0,0.06);
     }
-    /* 枠が画面上端から離れているレイアウトではセーフエリアの余白は不要 */
-    .app-header { padding-top: 18px; }
   }
 
   .app-header {
     flex: 0 0 auto;
-    padding: calc(18px + env(safe-area-inset-top, 0px)) 20px 14px;
+    padding: 18px 20px 14px;
     display: flex;
     align-items: center;
     gap: 10px;
