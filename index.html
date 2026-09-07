@@ -134,6 +134,16 @@
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   [hidden] { display: none !important; }
 
+  .ic {
+    width: 1.05em; height: 1.05em;
+    flex: 0 0 auto;
+    vertical-align: -0.16em;
+  }
+  .care-k .ic { width: 0.95em; height: 0.95em; vertical-align: -0.15em; margin-right: 1px; }
+  .veg-row-water .ic, .water-status .ic { color: var(--watch-ink); }
+  .veg-row-water .ic { width: 0.95em; height: 0.95em; margin-right: 3px; }
+  .veg-row-water.is-warn .ic { color: var(--grow); }
+
   .update-toast {
     position: fixed; left: 50%; z-index: 60;
     bottom: calc(74px + env(safe-area-inset-bottom, 0px));
@@ -197,6 +207,7 @@
   }
 
   .app-header {
+    position: relative;
     flex: 0 0 auto;
     padding: 18px 20px 14px;
     display: flex;
@@ -204,6 +215,15 @@
     gap: 10px;
     border-bottom: 1px solid var(--line);
     background: var(--app-bg);
+  }
+  .app-header::after {
+    content: "";
+    position: absolute;
+    left: 20px; right: 20px; bottom: -1px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--season-accent, var(--accent));
+    opacity: 0.85;
   }
   .app-header .brand-mark {
     width: 34px; height: 34px;
@@ -450,9 +470,30 @@
     text-align: center;
     color: var(--ink-soft);
     font-size: 0.86rem;
-    padding: 60px 20px;
+    padding: 48px 24px 52px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
-  .empty-state svg { width: 40px; height: 40px; margin-bottom: 10px; opacity: 0.5; }
+  .empty-illust {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--grow-soft);
+    margin-bottom: 16px;
+  }
+  .empty-illust .empty-ic { width: 44px; height: 44px; color: var(--accent); }
+  .empty-img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
+  .empty-title { font-family: var(--font-head); font-weight: 700; color: var(--ink); margin: 0 0 4px; }
+  .empty-sub { margin: 0; line-height: 1.7; max-width: 22em; }
+  .empty-cta {
+    margin-top: 16px;
+    font: inherit; font-weight: 700; font-size: 0.85rem;
+    padding: 9px 20px; border-radius: var(--r-pill);
+    border: 0; background: var(--accent); color: var(--accent-contrast);
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+  }
+  .empty-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   .section-label {
     font-family: var(--font-head);
@@ -1297,20 +1338,32 @@
     padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
   }
   .nav-btn {
+    position: relative;
     flex: 1 1 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 3px;
-    padding: 8px 4px 6px;
+    padding: 10px 4px 6px;
     border: none;
     background: transparent;
     color: var(--ink-soft);
     font-size: 0.68rem;
     cursor: pointer;
-    border-radius: 10px;
+    border-radius: var(--r-sm);
   }
   .nav-btn svg { width: 21px; height: 21px; }
+  .nav-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 18px; height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform var(--dur) var(--ease);
+  }
+  .nav-btn.is-active::before { transform: scaleX(1); }
   .nav-btn.is-active { color: var(--accent); font-weight: 700; }
   .nav-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
@@ -1832,6 +1885,50 @@
     return div.innerHTML;
   }
 
+  // 線アイコン（絵文字は使わない方針）
+  var ICON_PATHS = {
+    drop: '<path d="M12 3.2c0 0 5.8 6.1 5.8 10.6a5.8 5.8 0 0 1-11.6 0C6.2 9.3 12 3.2 12 3.2z"/>',
+    basket: '<path d="M4 9.5h16l-1.4 8.7a2 2 0 0 1-2 1.7H7.4a2 2 0 0 1-2-1.7L4 9.5z"/><path d="M8.7 9.5 12 3.5l3.3 6"/><path d="M9.5 13v3M14.5 13v3"/>',
+    search: '<circle cx="11" cy="11" r="6"/><path d="m20 20-3.6-3.6"/>',
+    sprout: '<path d="M12 20v-7"/><path d="M12 13c0-3-2.2-5.2-5-5.2 0 3 2.2 5.2 5 5.2z"/><path d="M12 13c0-3.4 2.5-6 5.6-6 0 3.4-2.5 6-5.6 6z"/><path d="M6 20h12"/>',
+    book: '<path d="M5 4.5h11a2 2 0 0 1 2 2V20l-3-1.6L12 20l-3-1.6L6 20V6.5a2 2 0 0 1 2-2z"/><path d="M9 8.5h6M9 12h6"/>'
+  };
+  function svgIcon(name, cls) {
+    return '<svg class="ic' + (cls ? " " + cls : "") + '" viewBox="0 0 24 24" fill="none" ' +
+      'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ' +
+      'aria-hidden="true" focusable="false">' + (ICON_PATHS[name] || "") + '</svg>';
+  }
+
+  // 空状態の挿絵スロット：後日ChatGPT/Geminiで作ったPNGを同フォルダに置き、
+  // ここにファイル名を入れると線アイコンから画像に切り替わる。
+  var EMPTY_ILLUST = {
+    growing: null,   // 例: "illust-empty-growing.png"
+    search: null,    // 例: "illust-empty-search.png"
+    yakuzen: null
+  };
+  function emptyStateHTML(o) {
+    var slot = EMPTY_ILLUST[o.key]
+      ? '<img class="empty-img" src="' + esc(EMPTY_ILLUST[o.key]) + '" alt="" />'
+      : svgIcon(o.icon || "sprout", "empty-ic");
+    return '<div class="empty-state">' +
+      '<div class="empty-illust">' + slot + '</div>' +
+      '<p class="empty-title">' + esc(o.title) + '</p>' +
+      (o.sub ? '<p class="empty-sub">' + esc(o.sub) + '</p>' : '') +
+      (o.cta ? '<button type="button" class="empty-cta" data-empty-cta="' + esc(o.ctaAction || "") + '">' + esc(o.cta) + '</button>' : '') +
+      '</div>';
+  }
+  function bindEmptyCta(container) {
+    var btn = container.querySelector("[data-empty-cta]");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var act = btn.getAttribute("data-empty-cta");
+      if (act === "home") {
+        var nb = document.querySelector('.nav-btn[data-nav="home"]');
+        if (nb) nb.click();
+      }
+    });
+  }
+
   // カタカナ→ひらがな（検索のかな照合用）
   function toHira(s) {
     return (s || "").replace(/[ァ-ヶ]/g, function (c) {
@@ -1926,7 +2023,7 @@
       var wn = lw ? daysSince(lw) : null;
       var wtxt = (lw && wn !== null) ? ("水やり " + (wn <= 0 ? "今日" : wn + "日前")) : "水やり未記録";
       var warn = (lw === null || wn === null || wn >= 3);
-      waterHTML = '<span class="veg-row-water' + (warn ? ' is-warn' : '') + '">💧 ' + esc(wtxt) + '</span>';
+      waterHTML = '<span class="veg-row-water' + (warn ? ' is-warn' : '') + '">' + svgIcon("drop") + esc(wtxt) + '</span>';
     }
     return (
       '<button class="veg-row" type="button" data-open="' + esc(veg.id) + '">' +
@@ -2055,12 +2152,12 @@
       '<p class="care-line"><span class="care-k">栽培中</span>' + growing.length + '種' +
         (doneToday.length ? '（今日 ' + doneToday.length + ' 種に水やり済み）' : '') + '</p>';
     if (needWater.length) {
-      html += '<p class="care-line care-warn"><span class="care-k">💧 水やり</span>' + chips(needWater) + '</p>';
+      html += '<p class="care-line care-warn"><span class="care-k">' + svgIcon("drop") + '水やり</span>' + chips(needWater) + '</p>';
     } else {
-      html += '<p class="care-line care-ok"><span class="care-k">💧 水やり</span>ひと通りOK</p>';
+      html += '<p class="care-line care-ok"><span class="care-k">' + svgIcon("drop") + '水やり</span>ひと通りOK</p>';
     }
     if (harvestSoon.length) {
-      html += '<p class="care-line"><span class="care-k">🌾 収穫どき</span>' + chips(harvestSoon) + '</p>';
+      html += '<p class="care-line"><span class="care-k">' + svgIcon("basket") + '収穫どき</span>' + chips(harvestSoon) + '</p>';
     }
     html += '</div>';
     cont.innerHTML = html;
@@ -2076,7 +2173,11 @@
     });
     var container = document.getElementById("home-list");
     if (list.length === 0) {
-      container.innerHTML = '<div class="empty-state"><p>該当する野菜が見つかりませんでした。</p></div>';
+      container.innerHTML = emptyStateHTML({
+        key: "search", icon: "search",
+        title: "該当する野菜が見つかりませんでした",
+        sub: "別のことばや、季節の絞り込みを変えてみてください。"
+      });
       return;
     }
     container.innerHTML = list.map(function (v) { return vegCardHTML(v); }).join("");
@@ -2087,11 +2188,13 @@
     var container = document.getElementById("growing-list");
     var list = APP_DATA.vegetables.filter(function (v) { return !!growingData[v.id]; });
     if (list.length === 0) {
-      container.innerHTML =
-        '<div class="empty-state">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-5 0-8-4-8-9a7 7 0 0 1 7-7c1 3 1 5 1 5s3-1 3-6c4 1 6 4.5 6 8.5 0 5-4 8.5-9 8.5z"/></svg>' +
-          '<p>まだ栽培中の野菜がありません。<br>野菜を選んで「栽培中にする」を押すとここに表示されます。</p>' +
-        '</div>';
+      container.innerHTML = emptyStateHTML({
+        key: "growing", icon: "sprout",
+        title: "まだ栽培中の野菜がありません",
+        sub: "野菜を選んで「栽培中にする」を押すと、ここで育ちを記録できます。",
+        cta: "野菜をさがす", ctaAction: "home"
+      });
+      bindEmptyCta(container);
     } else {
       container.innerHTML = '<p class="section-label">栽培中の野菜（' + list.length + '）</p><div class="veg-list">' +
         list.map(function (v) { return vegRowHTML(v, { showHarvestEstimate: true }); }).join("") + '</div>';
@@ -2605,7 +2708,7 @@
         '<button type="button" data-water-del="' + esc(d) + '" aria-label="削除">×</button></span>';
     }).join("");
     return '<div class="water-block">' +
-      '<div class="water-status"><span aria-hidden="true">💧</span><span id="water-status-text">' + esc(waterStatusText(id)) + '</span></div>' +
+      '<div class="water-status">' + svgIcon("drop") + '<span id="water-status-text">' + esc(waterStatusText(id)) + '</span></div>' +
       '<button class="water-btn' + (doneToday ? ' done-today' : '') + '" id="water-btn" type="button">' +
         (doneToday ? '今日は水やり済み' : '水やりした（今日）') +
       '</button>' +
@@ -3098,7 +3201,11 @@
     }
     var cont = document.getElementById("yakuzen-list");
     if (!items.length) {
-      cont.innerHTML = '<p class="yk-empty">該当する食材がありません。</p>';
+      cont.innerHTML = emptyStateHTML({
+        key: "yakuzen", icon: "search",
+        title: "該当する食材がありません",
+        sub: "検索のことばや、悩み別の絞り込みを変えてみてください。"
+      });
       return;
     }
     var html = "";
@@ -3407,6 +3514,16 @@
     av.classList.add("just-shown");
     window.setTimeout(function () { av.classList.remove("just-shown"); }, 700);
   }
+
+  (function applySeasonAccent() {
+    var m = new Date().getMonth() + 1;
+    var c;
+    if (m >= 3 && m <= 5) c = "var(--season-spring-summer)";
+    else if (m >= 7 && m <= 8) c = "var(--season-summer-autumn)";
+    else if (m >= 9 && m <= 11) c = "var(--season-autumn-spring)";
+    else c = "var(--watch-ink)"; // 冬・梅雨
+    try { document.documentElement.style.setProperty("--season-accent", c); } catch (e) {}
+  })();
 
   renderChips();
   renderHomeList();
