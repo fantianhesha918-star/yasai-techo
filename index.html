@@ -34,10 +34,21 @@
     --watch-ink: #47617a;
     --offgrade-soft: #f6ede0;
     --offgrade-ink: #93662f;
-    --shadow-card: 0 1px 2px rgba(38,43,31,0.06), 0 3px 10px rgba(38,43,31,0.06);
+    --shadow-card: 0 1px 2px rgba(38,43,31,0.05), 0 4px 12px rgba(38,43,31,0.07);
     --shadow-frame: 0 30px 70px rgba(38,43,31,0.28);
     --shadow-sheet: 0 -8px 30px rgba(38,43,31,0.18);
+    --shadow-raised: 0 4px 14px rgba(38, 43, 31, 0.12), 0 1px 3px rgba(38, 43, 31, 0.08);
     color-scheme: light;
+
+    /* テーマ非依存トークン（配色・影以外） */
+    --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+    --font-head: "Zen Maru Gothic", "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    --r-sm: 10px;
+    --r-md: 14px;
+    --r-lg: 20px;
+    --r-pill: 999px;
+    --ease: cubic-bezier(.2, .8, .2, 1);
+    --dur: 160ms;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -109,20 +120,10 @@
     --watch-ink: #47617a;
     --offgrade-soft: #f6ede0;
     --offgrade-ink: #93662f;
-    --shadow-card: 0 1px 2px rgba(38,43,31,0.06), 0 3px 10px rgba(38,43,31,0.06);
+    --shadow-card: 0 1px 2px rgba(38,43,31,0.05), 0 4px 12px rgba(38,43,31,0.07);
     --shadow-frame: 0 30px 70px rgba(38,43,31,0.28);
     --shadow-sheet: 0 -8px 30px rgba(38,43,31,0.18);
     color-scheme: light;
-
-    --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
-    --font-head: "Zen Maru Gothic", "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
-    --r-sm: 10px;
-    --r-md: 14px;
-    --r-lg: 20px;
-    --r-pill: 999px;
-    --ease: cubic-bezier(.2, .8, .2, 1);
-    --dur: 160ms;
-    --shadow-raised: 0 4px 14px rgba(38, 43, 31, 0.12), 0 1px 3px rgba(38, 43, 31, 0.08);
   }
   @media (prefers-color-scheme: dark) {
     :root { --shadow-raised: 0 6px 18px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.4); }
@@ -338,8 +339,8 @@
     text-align: left;
     background: var(--card-bg);
     border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 11px 14px;
+    border-radius: var(--r-md);
+    padding: 12px 14px;
     box-shadow: var(--shadow-card);
     cursor: pointer;
   }
@@ -390,7 +391,7 @@
   .grid-list {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 10px;
   }
   .grid-card {
     display: flex;
@@ -399,8 +400,8 @@
     text-align: left;
     background: var(--card-bg);
     border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 10px 11px;
+    border-radius: var(--r-md);
+    padding: 11px 12px;
     box-shadow: var(--shadow-card);
     cursor: pointer;
     min-width: 0;
@@ -488,7 +489,7 @@
   .tip-card {
     background: var(--card-bg);
     border: 1px solid var(--line);
-    border-radius: 14px;
+    border-radius: var(--r-md);
     box-shadow: var(--shadow-card);
     padding: 13px 15px;
     font-size: 0.88rem;
@@ -1077,10 +1078,20 @@
 
   /* ===== きょうの手当てカード ===== */
   .care-card {
-    background: var(--card-bg); border: 1px solid var(--line);
-    border-radius: 12px; padding: 12px 14px; margin-bottom: 14px;
+    background: var(--card-bg);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--accent) 9%, var(--card-bg)), var(--card-bg));
+    border: 1px solid var(--line);
+    border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+    border-left: 3px solid var(--accent);
+    border-radius: var(--r-md);
+    padding: 12px 14px; margin-bottom: 16px;
+    box-shadow: var(--shadow-card);
   }
-  .care-title { font-size: 0.82rem; font-weight: 700; margin: 0 0 8px; }
+  .care-title {
+    font-size: 0.86rem; font-weight: 700; margin: 0 0 8px;
+    color: var(--accent);
+  }
   .care-line {
     font-size: 0.82rem; line-height: 1.6; margin: 4px 0;
     display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
