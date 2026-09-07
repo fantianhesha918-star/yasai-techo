@@ -149,11 +149,13 @@
       box-shadow: var(--shadow-frame);
       border: 1px solid rgba(0,0,0,0.06);
     }
+    /* 枠が画面上端から離れているレイアウトではセーフエリアの余白は不要 */
+    .app-header { padding-top: 18px; }
   }
 
   .app-header {
     flex: 0 0 auto;
-    padding: 18px 20px 14px;
+    padding: calc(18px + env(safe-area-inset-top, 0px)) 20px 14px;
     display: flex;
     align-items: center;
     gap: 10px;
