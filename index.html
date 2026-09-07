@@ -38,6 +38,7 @@
     --shadow-frame: 0 30px 70px rgba(38,43,31,0.28);
     --shadow-sheet: 0 -8px 30px rgba(38,43,31,0.18);
     --shadow-raised: 0 4px 14px rgba(38, 43, 31, 0.12), 0 1px 3px rgba(38, 43, 31, 0.08);
+    --frame-glow: rgba(255, 255, 255, 0.5);
     color-scheme: light;
 
     /* テーマ非依存トークン（配色・影以外） */
@@ -126,10 +127,19 @@
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --shadow-raised: 0 6px 18px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.4); }
+    :root {
+      --shadow-raised: 0 6px 18px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.4);
+      --frame-glow: rgba(255, 255, 255, 0.035);
+    }
   }
-  :root[data-theme="dark"] { --shadow-raised: 0 6px 18px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.4); }
-  :root[data-theme="light"] { --shadow-raised: 0 4px 14px rgba(38, 43, 31, 0.12), 0 1px 3px rgba(38, 43, 31, 0.08); }
+  :root[data-theme="dark"] {
+    --shadow-raised: 0 6px 18px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.4);
+    --frame-glow: rgba(255, 255, 255, 0.035);
+  }
+  :root[data-theme="light"] {
+    --shadow-raised: 0 4px 14px rgba(38, 43, 31, 0.12), 0 1px 3px rgba(38, 43, 31, 0.08);
+    --frame-glow: rgba(255, 255, 255, 0.5);
+  }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   [hidden] { display: none !important; }
@@ -189,7 +199,8 @@
     height: 100dvh;
     /* iPhone のステータスバー/Dynamic Island 分を確保（standalone時のみ非0） */
     padding-top: env(safe-area-inset-top, 0px);
-    background: var(--app-bg);
+    background-color: var(--app-bg);
+    background-image: linear-gradient(180deg, var(--frame-glow, transparent), transparent 220px);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -1407,12 +1418,30 @@
     .view.just-shown .veg-row:nth-child(n+4) { animation-delay: 0.13s; }
   }
 
+  .theme-seg { display: flex; gap: 6px; }
+  .theme-opt {
+    flex: 1 1 0; font: inherit; font-size: 0.82rem;
+    padding: 9px 6px; border-radius: var(--r-sm);
+    border: 1px solid var(--line); background: var(--card-bg); color: var(--ink-soft);
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+  }
+  .theme-opt.is-on {
+    border-color: var(--accent); background: var(--grow-soft);
+    color: var(--accent); font-weight: 700;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .detail-sheet, .sheet-overlay { transition: none; }
     .app-body { scroll-behavior: auto; }
     * { animation-duration: 0.001ms !important; animation-delay: 0s !important; }
   }
 </style>
+<script>
+  try {
+    var _t = localStorage.getItem("yasai-techo-theme");
+    if (_t === "light" || _t === "dark") document.documentElement.setAttribute("data-theme", _t);
+  } catch (e) {}
+</script>
 
 <div class="app-frame">
 
@@ -3399,7 +3428,17 @@
     tag.textContent = "データ";
     tag.style.background = "var(--ink-soft)";
     var json = JSON.stringify(collectBackup(), null, 2);
+    var curTheme = "auto";
+    try { var st = localStorage.getItem("yasai-techo-theme"); if (st === "light" || st === "dark") curTheme = st; } catch (e) {}
     document.getElementById("sheet-body").innerHTML =
+      '<div class="settings-block">' +
+        '<p class="settings-h">見た目のテーマ</p>' +
+        '<div class="theme-seg" id="theme-seg">' +
+          '<button type="button" class="theme-opt' + (curTheme === "auto" ? " is-on" : "") + '" data-theme-opt="auto">端末に合わせる</button>' +
+          '<button type="button" class="theme-opt' + (curTheme === "light" ? " is-on" : "") + '" data-theme-opt="light">ライト</button>' +
+          '<button type="button" class="theme-opt' + (curTheme === "dark" ? " is-on" : "") + '" data-theme-opt="dark">ダーク</button>' +
+        '</div>' +
+      '</div>' +
       '<p class="settings-lead">栽培中・作業メモ・収穫・水やり・育てた記録などは、この端末のブラウザの中だけに保存されています。機種変更や再インストール、アイコンの削除で消えることがあるので、ときどきバックアップしておくと安心です。</p>' +
       '<div class="settings-block">' +
         '<p class="settings-h">書き出し（バックアップ）</p>' +
@@ -3419,6 +3458,17 @@
         '</div>' +
         '<p class="settings-note" id="restore-msg"></p>' +
       '</div>';
+
+    var themeSeg = document.getElementById("theme-seg");
+    if (themeSeg) {
+      themeSeg.querySelectorAll("[data-theme-opt]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          setTheme(b.getAttribute("data-theme-opt"));
+          themeSeg.querySelectorAll("[data-theme-opt]").forEach(function (x) { x.classList.remove("is-on"); });
+          b.classList.add("is-on");
+        });
+      });
+    }
 
     document.getElementById("backup-copy").addEventListener("click", function () {
       var ta = document.getElementById("backup-out");
@@ -3505,6 +3555,18 @@
       flashJustShown();
     });
   });
+
+  function setTheme(mode) {
+    try {
+      if (mode === "light" || mode === "dark") {
+        document.documentElement.setAttribute("data-theme", mode);
+        localStorage.setItem("yasai-techo-theme", mode);
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.removeItem("yasai-techo-theme");
+      }
+    } catch (e) {}
+  }
 
   function flashJustShown() {
     var av = document.querySelector(".view.is-active");
