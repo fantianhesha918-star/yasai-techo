@@ -1,5 +1,5 @@
 // キャッシュ内容を変えたら CACHE_NAME を必ず更新すること（バージョンを上げないと利用者に更新が届かない）
-var CACHE_NAME = "yasai-techo-v35";
+var CACHE_NAME = "yasai-techo-v36";
 var FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 var ASSETS = [
   "./",
@@ -10,7 +10,6 @@ var ASSETS = [
   "./icon-512.png",
   "./icon-512-maskable.png",
   "./illust-home-hero.png",
-  "./illust-yakuzen-banner.png",
   "./illust-empty-growing.png",
   "./illust-empty-search.png",
   "./illust-empty-yakuzen.png"

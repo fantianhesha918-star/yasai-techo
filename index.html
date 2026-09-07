@@ -495,11 +495,11 @@
   }
   .empty-illust .empty-ic { width: 44px; height: 44px; color: var(--accent); }
   .empty-illust:has(.empty-img) {
-    width: 168px; height: 168px;
-    border-radius: var(--r-lg);
-    background: var(--card-bg);
+    width: 176px; height: 176px;
+    border-radius: 0;
+    background: none;
   }
-  .empty-img { width: 100%; height: 100%; object-fit: contain; border-radius: inherit; }
+  .empty-img { width: 100%; height: 100%; object-fit: contain; }
   .empty-title { font-family: var(--font-head); font-weight: 700; color: var(--ink); margin: 0 0 4px; }
   .empty-sub { margin: 0; line-height: 1.7; max-width: 22em; }
   .empty-cta {
@@ -519,16 +519,6 @@
     object-position: center 80%;
     border-radius: var(--r-md);
     margin-bottom: 14px;
-    border: 1px solid var(--line);
-  }
-  .yk-hero {
-    display: block;
-    width: 100%;
-    height: 92px;
-    object-fit: cover;
-    object-position: center 58%;
-    border-radius: var(--r-md);
-    margin-bottom: 12px;
     border: 1px solid var(--line);
   }
 
@@ -1538,7 +1528,6 @@
 
     <!-- 薬膳 -->
     <section class="view" data-view="yakuzen">
-      <img class="yk-hero" src="illust-yakuzen-banner.png" alt="" />
       <div id="yakuzen-banner" class="yk-banner"></div>
       <div id="yakuzen-shun" class="yk-shun"></div>
       <p class="section-label yk-guide-hd">薬膳の基礎知識（タップで開く）</p>
