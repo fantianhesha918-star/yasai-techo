@@ -114,6 +114,25 @@
 
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
+
+  .update-toast {
+    position: fixed; left: 50%; z-index: 60;
+    bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+    transform: translate(-50%, 20px); opacity: 0;
+    display: flex; align-items: center; gap: 12px;
+    max-width: calc(100% - 32px);
+    padding: 10px 12px 10px 16px; border-radius: 999px;
+    background: #262b1f; color: #fff;
+    font-size: 0.82rem; box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .update-toast.is-in { opacity: 1; transform: translate(-50%, 0); }
+  .update-toast button {
+    font: inherit; font-weight: 700; font-size: 0.8rem;
+    padding: 6px 14px; border-radius: 999px; border: 0;
+    background: #fff; color: var(--accent); cursor: pointer;
+    white-space: nowrap; -webkit-appearance: none; appearance: none;
+  }
   html, body { margin: 0; padding: 0; height: 100%; }
   body {
     background: var(--bg-outer);
@@ -2057,6 +2076,7 @@
       renderGrowingList();
     });
     document.getElementById("sheet-overlay").classList.add("is-open");
+    pushSheetHistory();
     focusSheet();
   }
 
@@ -2529,6 +2549,7 @@
     }
 
     document.getElementById("sheet-overlay").classList.add("is-open");
+    pushSheetHistory();
     focusSheet();
   }
 
@@ -2563,7 +2584,25 @@
       try { lastSheetTrigger.focus(); } catch (e) {}
     }
     lastSheetTrigger = null;
+    if (sheetHistoryPushed) { sheetHistoryPushed = false; try { history.back(); } catch (e) {} }
   }
+
+  var sheetHistoryPushed = false;
+  function pushSheetHistory() {
+    try {
+      if (!sheetHistoryPushed && window.history && history.pushState) {
+        history.pushState({ __sheet: true }, "");
+        sheetHistoryPushed = true;
+      }
+    } catch (e) {}
+  }
+  window.addEventListener("popstate", function () {
+    sheetHistoryPushed = false;
+    var pv = document.getElementById("photo-viewer");
+    if (pv && pv.classList.contains("is-open")) closePhotoViewer();
+    var overlay = document.getElementById("sheet-overlay");
+    if (overlay && overlay.classList.contains("is-open")) closeDetail();
+  });
 
   document.getElementById("veg-search").addEventListener("input", function (e) {
     currentSearch = e.target.value.trim();
@@ -2923,6 +2962,7 @@
       });
     }
     document.getElementById("sheet-overlay").classList.add("is-open");
+    pushSheetHistory();
     focusSheet();
   }
 
@@ -3042,6 +3082,7 @@
     });
 
     document.getElementById("sheet-overlay").classList.add("is-open");
+    pushSheetHistory();
     focusSheet();
   }
 
@@ -3088,9 +3129,32 @@
     }
   })();
 
+  function showUpdateToast() {
+    if (document.getElementById("update-toast")) return;
+    var t = document.createElement("div");
+    t.id = "update-toast";
+    t.className = "update-toast";
+    t.innerHTML = '<span>新しいバージョンがあります</span>' +
+      '<button type="button" id="update-reload">再読み込み</button>';
+    document.body.appendChild(t);
+    document.getElementById("update-reload").addEventListener("click", function () {
+      window.location.reload();
+    });
+    requestAnimationFrame(function () { t.classList.add("is-in"); });
+  }
+
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
-      navigator.serviceWorker.register("./sw.js").catch(function () {});
+      navigator.serviceWorker.register("./sw.js").then(function (reg) {
+        if (reg.waiting && navigator.serviceWorker.controller) showUpdateToast();
+        reg.addEventListener("updatefound", function () {
+          var nw = reg.installing;
+          if (!nw) return;
+          nw.addEventListener("statechange", function () {
+            if (nw.state === "installed" && navigator.serviceWorker.controller) showUpdateToast();
+          });
+        });
+      }).catch(function () {});
     });
   }
 </script>
