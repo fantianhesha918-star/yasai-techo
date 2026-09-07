@@ -772,6 +772,34 @@
   .note-yakuzen { background: rgba(124,106,158,0.12); }
   .note-yakuzen .note-label { color: var(--season-year-round); border: 1px solid var(--season-year-round); }
   .yakuzen-line-hint { display: block; margin-top: 4px; font-size: 0.72rem; color: var(--ink-soft); }
+  button.note-block.yk-jump {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    border: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+  }
+  .yk-jump-veg {
+    display: block;
+    width: 100%;
+    margin: 2px 0 12px;
+    padding: 10px 13px;
+    border-radius: 12px;
+    border: 1px solid var(--accent);
+    background: rgba(77,122,63,0.08);
+    color: var(--accent);
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+  }
+  .yk-jump-veg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* 成長ステージ チェックリスト */
   .stage-card {
@@ -2246,12 +2274,21 @@
     }
     return null;
   }
+  function findVegForYakuzen(yk) {
+    var hn = toHira(yk.name);
+    var vs = APP_DATA.vegetables;
+    for (var i = 0; i < vs.length; i++) {
+      if (hn.indexOf(toHira(vs[i].name)) === 0) return vs[i];
+    }
+    return null;
+  }
   function vegYakuzenLineHTML(veg) {
     var yk = findYakuzenForVeg(veg);
     if (!yk) return "";
-    return '<p class="note-block note-yakuzen"><span class="note-label">薬膳</span>五性 ' +
+    return '<button type="button" class="note-block note-yakuzen yk-jump" data-ykjump="' + esc(yk.name) + '">' +
+      '<span class="note-label">薬膳</span>五性 ' +
       esc(yk.sei) + '（' + esc(seiDesc(yk.sei)) + '）｜' + esc(yk.kou) +
-      '<span class="yakuzen-line-hint">くわしくは薬膳タブ</span></p>';
+      '<span class="yakuzen-line-hint">薬膳の詳しい見方を開く ›</span></button>';
   }
 
   function openDetail(id) {
@@ -2336,6 +2373,13 @@
 
     bindRecordForms(veg.id);
     if (growing) { bindWaterBlock(veg.id); renderPhotoBlock(veg.id); }
+
+    var ykJump = document.querySelector("#sheet-body [data-ykjump]");
+    if (ykJump) {
+      ykJump.addEventListener("click", function () {
+        openYakuzen(ykJump.getAttribute("data-ykjump"));
+      });
+    }
 
     document.getElementById("sheet-overlay").classList.add("is-open");
     focusSheet();
@@ -2611,6 +2655,7 @@
       if (YAKUZEN[i].name === name) { f = YAKUZEN[i]; break; }
     }
     if (!f) return;
+    var relVeg = findVegForYakuzen(f);
     lastSheetTrigger = document.activeElement;
     document.getElementById("sheet-name").textContent = f.name;
     var tag = document.getElementById("sheet-family");
@@ -2631,7 +2676,16 @@
       (f.chui && f.chui !== "—"
         ? '<p class="note-block note-offgrade"><span class="note-label">注意</span>' + esc(f.chui) + '</p>'
         : '') +
+      (relVeg
+        ? '<button type="button" class="yk-jump-veg" data-vegjump="' + esc(relVeg.id) + '">' + esc(relVeg.name) + 'の育て方を見る ›</button>'
+        : '') +
       '<p class="yk-disclaimer">' + esc(YK_DISCLAIMER) + '</p>';
+    var vj = document.querySelector("#sheet-body [data-vegjump]");
+    if (vj) {
+      vj.addEventListener("click", function () {
+        openDetail(vj.getAttribute("data-vegjump"));
+      });
+    }
     document.getElementById("sheet-overlay").classList.add("is-open");
     focusSheet();
   }
