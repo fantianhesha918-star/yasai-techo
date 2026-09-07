@@ -177,6 +177,51 @@
     color: var(--ink-soft);
     margin: 1px 0 0;
   }
+  .header-action {
+    margin-left: auto;
+    flex: 0 0 auto;
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--card-bg);
+    color: var(--ink-soft);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .header-action svg { width: 18px; height: 18px; }
+  .header-action:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* 設定・バックアップ */
+  .settings-lead { font-size: 0.82rem; line-height: 1.65; color: var(--ink-soft); margin: 0 0 14px; }
+  .settings-block { margin-bottom: 18px; }
+  .settings-h { font-size: 0.85rem; font-weight: 700; margin: 0 0 8px; }
+  .settings-note { font-size: 0.76rem; color: var(--ink-soft); line-height: 1.6; margin: 8px 0 0; }
+  .settings-ta {
+    width: 100%; max-width: 100%; min-width: 0;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--app-bg);
+    color: var(--ink);
+    font-size: 0.76rem;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    resize: vertical;
+    -webkit-appearance: none; appearance: none;
+  }
+  .settings-btn-row { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .settings-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    font-size: 0.83rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .settings-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* ===== スクロール本体 ===== */
   .app-body {
@@ -893,6 +938,9 @@
       <h1 id="header-title">やさい手帳</h1>
       <p class="brand-sub" id="header-sub">季節の野菜を育てよう</p>
     </div>
+    <button class="header-action" id="settings-btn" type="button" aria-label="設定・バックアップ">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
   </header>
 
   <main class="app-body">
@@ -1665,6 +1713,7 @@
   });
 
   document.getElementById("sheet-close").addEventListener("click", closeDetail);
+  document.getElementById("settings-btn").addEventListener("click", openSettings);
   document.getElementById("sheet-overlay").addEventListener("click", function (e) {
     if (e.target === this) closeDetail();
   });
@@ -1869,6 +1918,111 @@
         ? '<p class="note-block note-offgrade"><span class="note-label">注意</span>' + esc(f.chui) + '</p>'
         : '') +
       '<p class="yk-disclaimer">' + esc(YK_DISCLAIMER) + '</p>';
+    document.getElementById("sheet-overlay").classList.add("is-open");
+    focusSheet();
+  }
+
+  /* ===== 設定・バックアップ ===== */
+  function collectBackup() {
+    var data = {};
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf("yasai-techo-") === 0) {
+          try { data[k] = JSON.parse(localStorage.getItem(k)); }
+          catch (e) { data[k] = localStorage.getItem(k); }
+        }
+      }
+    } catch (e) {}
+    return { app: "yasai-techo", version: 1, exportedAt: new Date().toISOString(), data: data };
+  }
+  function applyBackup(obj) {
+    if (!obj || obj.app !== "yasai-techo" || !obj.data || typeof obj.data !== "object") {
+      return "やさい手帳のバックアップ形式ではありません。";
+    }
+    var keys = Object.keys(obj.data);
+    if (!keys.length) return "データが空です。";
+    try {
+      keys.forEach(function (k) {
+        if (k.indexOf("yasai-techo-") !== 0) return;
+        var v = obj.data[k];
+        localStorage.setItem(k, typeof v === "string" ? v : JSON.stringify(v));
+      });
+    } catch (e) { return "保存に失敗しました（容量不足の可能性があります）。"; }
+    return null;
+  }
+  function openSettings() {
+    lastSheetTrigger = document.activeElement;
+    document.getElementById("sheet-name").textContent = "設定・バックアップ";
+    var tag = document.getElementById("sheet-family");
+    tag.textContent = "データ";
+    tag.style.background = "var(--ink-soft)";
+    var json = JSON.stringify(collectBackup(), null, 2);
+    document.getElementById("sheet-body").innerHTML =
+      '<p class="settings-lead">栽培中・作業メモ・収穫・水やり・育てた記録などは、この端末のブラウザの中だけに保存されています。機種変更や再インストール、アイコンの削除で消えることがあるので、ときどきバックアップしておくと安心です。</p>' +
+      '<div class="settings-block">' +
+        '<p class="settings-h">書き出し（バックアップ）</p>' +
+        '<textarea class="settings-ta" id="backup-out" readonly rows="5">' + esc(json) + '</textarea>' +
+        '<div class="settings-btn-row">' +
+          '<button class="settings-btn" id="backup-copy" type="button">コピー</button>' +
+          '<button class="settings-btn" id="backup-save" type="button">ファイルに保存</button>' +
+        '</div>' +
+        '<p class="settings-note" id="backup-msg">コピーしてメモアプリやメールに貼り付けて保管してください。</p>' +
+      '</div>' +
+      '<div class="settings-block">' +
+        '<p class="settings-h">読み込み（復元）</p>' +
+        '<p class="settings-note">バックアップしたJSONを貼り付けて読み込むと、<b>今の記録をすべて上書き</b>します。</p>' +
+        '<textarea class="settings-ta" id="restore-in" rows="4" placeholder="バックアップJSONをここに貼り付け"></textarea>' +
+        '<div class="settings-btn-row">' +
+          '<button class="settings-btn" id="restore-run" type="button">読み込む</button>' +
+        '</div>' +
+        '<p class="settings-note" id="restore-msg"></p>' +
+      '</div>';
+
+    document.getElementById("backup-copy").addEventListener("click", function () {
+      var ta = document.getElementById("backup-out");
+      var msg = document.getElementById("backup-msg");
+      var done = function () { msg.textContent = "コピーしました。メモアプリやメールに貼り付けて保管してください。"; };
+      var fallback = function () {
+        try { ta.focus(); ta.select(); document.execCommand("copy"); done(); }
+        catch (e) { msg.textContent = "コピーできませんでした。上のテキストを手動で選択してください。"; }
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(ta.value).then(done, fallback);
+      } else { fallback(); }
+    });
+    document.getElementById("backup-save").addEventListener("click", function () {
+      var msg = document.getElementById("backup-msg");
+      try {
+        var blob = new Blob([document.getElementById("backup-out").value], { type: "application/json" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        var d = new Date();
+        var stamp = d.getFullYear() + ("0" + (d.getMonth() + 1)).slice(-2) + ("0" + d.getDate()).slice(-2);
+        a.href = url;
+        a.download = "yasai-techo-backup-" + stamp + ".json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+        msg.textContent = "ファイルを保存しました。";
+      } catch (e) {
+        msg.textContent = "この環境ではファイル保存ができません。「コピー」をお使いください。";
+      }
+    });
+    document.getElementById("restore-run").addEventListener("click", function () {
+      var msg = document.getElementById("restore-msg");
+      var raw = (document.getElementById("restore-in").value || "").trim();
+      if (!raw) { msg.textContent = "バックアップJSONを貼り付けてください。"; return; }
+      var obj;
+      try { obj = JSON.parse(raw); } catch (e) { msg.textContent = "JSONの形式が正しくありません。"; return; }
+      if (!window.confirm("今の記録をすべて上書きします。よろしいですか？")) return;
+      var err = applyBackup(obj);
+      if (err) { msg.textContent = err; return; }
+      msg.textContent = "読み込みました。画面を更新します…";
+      setTimeout(function () { location.reload(); }, 800);
+    });
+
     document.getElementById("sheet-overlay").classList.add("is-open");
     focusSheet();
   }
