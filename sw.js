@@ -1,5 +1,5 @@
 // キャッシュ内容を変えたら CACHE_NAME を必ず更新すること（バージョンを上げないと利用者に更新が届かない）
-var CACHE_NAME = "yasai-techo-v41";
+var CACHE_NAME = "yasai-techo-v42";
 var FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 var ASSETS = [
   "./",
@@ -11,7 +11,11 @@ var ASSETS = [
   "./icon-512-maskable.png",
   "./illust-empty-growing.png",
   "./illust-empty-search.png",
-  "./illust-empty-yakuzen.png"
+  "./illust-empty-yakuzen.png",
+  "./illust-season-spring.png",
+  "./illust-season-summer.png",
+  "./illust-season-autumn.png",
+  "./illust-season-winter.png"
 ];
 
 self.addEventListener("install", function (event) {
