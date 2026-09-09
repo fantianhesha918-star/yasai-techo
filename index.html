@@ -270,9 +270,10 @@
     mix-blend-mode: multiply;
     pointer-events: none;
   }
-  :root[data-theme="dark"] .header-illust { display: none; }
+  /* 夜（ダーク）は明るい要素だけ乗せたいので screen 合成。画像が無い季節は JS が空にする */
+  :root[data-theme="dark"] .header-illust { mix-blend-mode: screen; }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .header-illust { display: none; }
+    :root:not([data-theme="light"]) .header-illust { mix-blend-mode: screen; }
   }
   .app-header::after {
     content: "";
@@ -1557,11 +1558,7 @@
     display: none;
   }
   .header-motif svg { width: 100%; height: 100%; }
-  /* ヘッダー帯イラストが出ない環境（ダーク）では線画モチーフを表示 */
-  :root[data-theme="dark"] .header-motif { display: block; }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .header-motif { display: block; }
-  }
+  /* 表示可否は applySeasonScene() が制御（夜で帯イラストが無い季節のみ月を出す） */
 
   @media (prefers-reduced-motion: reduce) {
     .detail-sheet, .sheet-overlay { transition: none; }
@@ -3926,12 +3923,15 @@
         winter: WINTER_NIGHT
       };
 
+      // 夜用ヘッダー画像が用意できている季節（差し替わり次第 true にする）
+      var NIGHT_HEADER = { spring: true, summer: false, autumn: false, winter: false };
+
       var night = isDarkNow();
+      var nightImg = night && NIGHT_HEADER[season];
       if (night) {
         root.style.setProperty("--season-wash", NIGHT_BG.wash);
         root.style.setProperty("--season-ink", NIGHT_BG.ink);
         root.style.setProperty("--season-mask", maskURI(NIGHT_BG[season] || STARFIELD));
-        if (mo) mo.innerHTML = '<svg viewBox="0 0 24 24" fill="none">' + MOON_LINE + '</svg>';
       } else {
         var cfg = SEASON_BG[season];
         if (cfg) {
@@ -3942,7 +3942,20 @@
       }
 
       var hi = document.getElementById("header-illust");
-      if (hi) hi.style.backgroundImage = 'url("illust-season-' + season + '.png")';
+      if (hi) {
+        if (nightImg) hi.style.backgroundImage = 'url("illust-season-' + season + '-night.png")';
+        else if (!night) hi.style.backgroundImage = 'url("illust-season-' + season + '.png")';
+        else hi.style.backgroundImage = "none";
+      }
+      // 帯イラストが無い夜の季節だけ、線画の月を出す
+      if (mo) {
+        if (night && !nightImg) {
+          mo.innerHTML = '<svg viewBox="0 0 24 24" fill="none">' + MOON_LINE + '</svg>';
+          mo.style.display = "block";
+        } else {
+          mo.style.display = "none";
+        }
+      }
     } catch (e) {}
   }
   applySeasonScene();
