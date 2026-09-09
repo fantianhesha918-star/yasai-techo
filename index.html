@@ -225,10 +225,17 @@
             mask-size: 200px 200px;
     opacity: 0.06;
   }
+  @keyframes nightTwinkle { 0%, 100% { opacity: 0.11; } 50% { opacity: 0.17; } }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .season-layer { opacity: 0.07; }
+    :root:not([data-theme="light"]) .season-layer {
+      opacity: 0.12;
+      animation: nightTwinkle 7s ease-in-out infinite;
+    }
   }
-  :root[data-theme="dark"] .season-layer { opacity: 0.07; }
+  :root[data-theme="dark"] .season-layer {
+    opacity: 0.12;
+    animation: nightTwinkle 7s ease-in-out infinite;
+  }
   .app-header, .app-body, .bottom-nav { position: relative; }
   @media (min-width: 431px) {
     body { padding: 32px 16px; }
@@ -3749,6 +3756,7 @@
         localStorage.removeItem("yasai-techo-theme");
       }
     } catch (e) {}
+    if (typeof applySeasonScene === "function") applySeasonScene();
   }
 
   function reducedMotion() {
@@ -3805,7 +3813,14 @@
     window.setTimeout(function () { av.classList.remove("just-shown"); }, 700);
   }
 
-  (function applySeasonAccent() {
+  function isDarkNow() {
+    var t = document.documentElement.getAttribute("data-theme");
+    if (t === "dark") return true;
+    if (t === "light") return false;
+    return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  }
+
+  function applySeasonScene() {
     var m = new Date().getMonth() + 1;
     var c, motif;
     var S = 'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"';
@@ -3848,6 +3863,42 @@
         return p;
       };
       var flake = function (x, y, r) { return "<circle cx='" + x + "' cy='" + y + "' r='" + r + "'/>"; };
+      var star = function (x, y, r) { return "<circle cx='" + x + "' cy='" + y + "' r='" + r + "'/>"; };
+      var spark = function (x, y, s) {
+        return "<path d='M" + x + " " + (y - s) + "L" + (x + s * 0.3).toFixed(1) + " " + (y - s * 0.3).toFixed(1) +
+          "L" + (x + s) + " " + y + "L" + (x + s * 0.3).toFixed(1) + " " + (y + s * 0.3).toFixed(1) +
+          "L" + x + " " + (y + s) + "L" + (x - s * 0.3).toFixed(1) + " " + (y + s * 0.3).toFixed(1) +
+          "L" + (x - s) + " " + y + "L" + (x - s * 0.3).toFixed(1) + " " + (y - s * 0.3).toFixed(1) + "Z'/>";
+      };
+      var circ = function (cx, cy, r) {
+        return "M" + (cx - r) + " " + cy + "a" + r + " " + r + " 0 1 0 " + (2 * r) + " 0a" + r + " " + r + " 0 1 0 " + (-2 * r) + " 0";
+      };
+      var crescent = function (cx, cy, r) {
+        return "<path fill-rule='evenodd' d='" + circ(cx, cy, r) + circ(cx + r * 0.55, cy - r * 0.12, r * 0.92) + "'/>";
+      };
+      var scatterStars = function (list) {
+        return list.map(function (p) { return star(p[0], p[1], p[2]); }).join("");
+      };
+
+      var MOON_LINE = '<path d="M15 3a9 9 0 1 0 6.5 15.2A7.5 7.5 0 0 1 15 3z" ' + S + '/>';
+
+      var STARFIELD = scatterStars([
+        [24,30,1.6],[60,20,1],[110,34,1.9],[150,22,1.2],[182,44,1.5],[40,70,1],[90,64,1.3],
+        [134,72,1],[170,92,1.7],[30,120,1.2],[70,140,1],[112,128,1.5],[150,150,1.1],
+        [186,132,1.3],[96,170,1.2],[52,178,1]
+      ]) + spark(150,22,4) + spark(112,128,3.4) + spark(40,70,3);
+
+      var SUMMER_NIGHT = scatterStars([
+        [20,24,1.2],[46,40,1.7],[70,20,1],[96,36,1.4],[122,22,1.1],[150,40,1.9],[178,26,1.3],
+        [32,64,1],[60,78,1.6],[88,60,1.1],[116,80,1.8],[144,66,1],[172,84,1.4],[24,104,1.3],
+        [54,120,1],[84,110,1.6],[112,126,1.1],[140,116,1.4],[168,132,1],[40,156,1.2],
+        [74,170,1.5],[104,158,1],[132,174,1.3],[160,164,1.1],[186,150,1.4]
+      ]) + spark(60,78,3.2) + spark(116,80,3) + spark(74,170,2.8);
+
+      var WINTER_NIGHT =
+        flake(30,40,2.8) + flake(96,92,3.2) + flake(52,150,2.4) + flake(120,176,1.8) +
+        flake(80,60,2.2) + flake(18,108,1.8) + flake(140,120,2.6) +
+        scatterStars([[60,22,1.3],[110,30,1],[176,60,1.4],[40,90,1],[150,150,1.1],[96,168,1.2],[150,22,1.2],[182,44,1.4]]);
 
       var SEASON_BG = {
         spring: {
@@ -3867,17 +3918,39 @@
           mask: flake(30, 36, 3.2) + flake(150, 26, 2.2) + flake(96, 90, 3.8) + flake(52, 150, 2.6) + flake(172, 140, 3) + flake(120, 176, 2) + flake(80, 60, 2.4) + flake(190, 84, 2.8) + flake(18, 104, 2)
         }
       };
-      var cfg = SEASON_BG[season];
-      if (cfg) {
-        root.style.setProperty("--season-wash", cfg.wash);
-        root.style.setProperty("--season-ink", cfg.ink);
-        root.style.setProperty("--season-mask", maskURI(cfg.mask));
+      var NIGHT_BG = {
+        wash: "rgba(150,170,214,0.05)", ink: "#cbd6ea",
+        spring: STARFIELD,
+        summer: SUMMER_NIGHT,
+        autumn: STARFIELD,
+        winter: WINTER_NIGHT
+      };
+
+      var night = isDarkNow();
+      if (night) {
+        root.style.setProperty("--season-wash", NIGHT_BG.wash);
+        root.style.setProperty("--season-ink", NIGHT_BG.ink);
+        root.style.setProperty("--season-mask", maskURI(NIGHT_BG[season] || STARFIELD));
+        if (mo) mo.innerHTML = '<svg viewBox="0 0 24 24" fill="none">' + MOON_LINE + '</svg>';
+      } else {
+        var cfg = SEASON_BG[season];
+        if (cfg) {
+          root.style.setProperty("--season-wash", cfg.wash);
+          root.style.setProperty("--season-ink", cfg.ink);
+          root.style.setProperty("--season-mask", maskURI(cfg.mask));
+        }
       }
 
       var hi = document.getElementById("header-illust");
       if (hi) hi.style.backgroundImage = 'url("illust-season-' + season + '.png")';
     } catch (e) {}
-  })();
+  }
+  applySeasonScene();
+  if (window.matchMedia) {
+    try {
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applySeasonScene);
+    } catch (e) {}
+  }
 
   applyHeaderText(currentNav);
   renderChips();
