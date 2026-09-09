@@ -178,7 +178,8 @@
   }
   html, body { margin: 0; padding: 0; height: 100%; }
   body {
-    background: var(--bg-outer);
+    background-color: var(--bg-outer);
+    background-image: linear-gradient(var(--season-wash, transparent), var(--season-wash, transparent));
     color: var(--ink);
     font-family: var(--font-body);
     line-height: 1.62;
@@ -204,11 +205,31 @@
     /* iPhone のステータスバー/Dynamic Island 分を確保（standalone時のみ非0） */
     padding-top: env(safe-area-inset-top, 0px);
     background-color: var(--app-bg);
-    background-image: linear-gradient(180deg, var(--frame-glow, transparent), transparent 220px);
+    background-image:
+      linear-gradient(var(--season-wash, transparent), var(--season-wash, transparent)),
+      linear-gradient(180deg, var(--frame-glow, transparent), transparent 220px);
     display: flex;
     flex-direction: column;
     overflow: hidden;
   }
+  .season-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-color: var(--season-ink, transparent);
+    -webkit-mask-image: var(--season-mask, none);
+            mask-image: var(--season-mask, none);
+    -webkit-mask-repeat: repeat;
+            mask-repeat: repeat;
+    -webkit-mask-size: 200px 200px;
+            mask-size: 200px 200px;
+    opacity: 0.06;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .season-layer { opacity: 0.07; }
+  }
+  :root[data-theme="dark"] .season-layer { opacity: 0.07; }
+  .app-header, .app-body, .bottom-nav { position: relative; }
   @media (min-width: 431px) {
     body { padding: 32px 16px; }
     .app-frame {
@@ -229,7 +250,7 @@
     align-items: center;
     gap: 10px;
     border-bottom: 1px solid var(--line);
-    background: var(--app-bg);
+    background: transparent;
   }
   .app-header::after {
     content: "";
@@ -1528,6 +1549,8 @@
 </script>
 
 <div class="app-frame">
+
+  <div class="season-layer" id="season-layer" aria-hidden="true"></div>
 
   <header class="app-header">
     <span class="brand-mark">
@@ -3769,14 +3792,66 @@
     var LEAF = '<path d="M6 20c0-8 5-13 13-14 1 9-4 14-13 14z" ' + S + '/><path d="M6 20c1-6 4-9 9-11" ' + S + '/>';
     var SNOW = '<path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9" ' + S + '/><path d="M12 6l-2 -2M12 6l2 -2M12 18l-2 2M12 18l2 2" ' + S + '/>';
     var RAIN = '<path d="M8 4s-3 4-3 6.4A3 3 0 0 0 11 10.4C11 8 8 4 8 4z" ' + S + '/><path d="M16 11s-2.4 3.4-2.4 5.4A2.4 2.4 0 0 0 18.4 16.4C18.4 14.4 16 11 16 11z" ' + S + '/>';
-    if (m >= 3 && m <= 5) { c = "var(--season-spring-summer)"; motif = FLOWER; }
-    else if (m === 6) { c = "var(--watch-ink)"; motif = RAIN; }
-    else if (m >= 7 && m <= 8) { c = "var(--season-summer-autumn)"; motif = SUN; }
-    else if (m >= 9 && m <= 11) { c = "var(--season-autumn-spring)"; motif = LEAF; }
-    else { c = "var(--watch-ink)"; motif = SNOW; } // 冬
+    var season;
+    if (m >= 3 && m <= 5) { c = "var(--season-spring-summer)"; motif = FLOWER; season = "spring"; }
+    else if (m === 6) { c = "var(--watch-ink)"; motif = RAIN; season = "summer"; }
+    else if (m >= 7 && m <= 8) { c = "var(--season-summer-autumn)"; motif = SUN; season = "summer"; }
+    else if (m >= 9 && m <= 11) { c = "var(--season-autumn-spring)"; motif = LEAF; season = "autumn"; }
+    else { c = "var(--watch-ink)"; motif = SNOW; season = "winter"; } // 冬
     try { document.documentElement.style.setProperty("--season-accent", c); } catch (e) {}
     var mo = document.getElementById("header-motif");
     if (mo) mo.innerHTML = '<svg viewBox="0 0 24 24" fill="none">' + motif + '</svg>';
+
+    // 季節の背景（うっすらした色味＋散らし模様）
+    try {
+      var root = document.documentElement;
+      root.setAttribute("data-season", season);
+
+      function maskURI(inner) {
+        var svg = "<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><g fill='#fff'>" + inner + "</g></svg>";
+        return 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
+      }
+      var petal = function (x, y, r) {
+        return "<ellipse cx='" + x + "' cy='" + y + "' rx='4.5' ry='11' transform='rotate(" + r + " " + x + " " + y + ")'/>";
+      };
+      var leaf = function (x, y, r) {
+        return "<path d='M0 12C-8 6-8-6 0-12C8-6 8 6 0 12Z' transform='translate(" + x + " " + y + ") rotate(" + r + ") scale(1.15)'/>";
+      };
+      var flower = function (cx, cy, s) {
+        var p = "<circle cx='" + cx + "' cy='" + cy + "' r='" + (s * 0.9).toFixed(1) + "'/>";
+        for (var i = 0; i < 6; i++) {
+          var a = i * Math.PI / 3;
+          p += "<circle cx='" + (cx + Math.cos(a) * s * 1.9).toFixed(1) + "' cy='" + (cy + Math.sin(a) * s * 1.9).toFixed(1) + "' r='" + (s * 0.75).toFixed(1) + "'/>";
+        }
+        return p;
+      };
+      var flake = function (x, y, r) { return "<circle cx='" + x + "' cy='" + y + "' r='" + r + "'/>"; };
+
+      var SEASON_BG = {
+        spring: {
+          wash: "rgba(214,138,160,0.05)", ink: "#d98aa0",
+          mask: petal(28, 36, 20) + petal(150, 26, -35) + petal(96, 92, 62) + petal(52, 152, -12) + petal(174, 140, 40) + petal(120, 178, 8) + petal(82, 20, 24)
+        },
+        summer: {
+          wash: "rgba(224,172,63,0.055)", ink: "#e0ac3f",
+          mask: flower(44, 48, 6) + flower(150, 40, 5) + flower(96, 150, 6.5) + flower(28, 138, 4) + flower(172, 150, 4.5)
+        },
+        autumn: {
+          wash: "rgba(197,106,52,0.055)", ink: "#c56a34",
+          mask: leaf(32, 40, 18) + leaf(152, 30, -28) + leaf(96, 112, 54) + leaf(56, 160, -14) + leaf(176, 150, 34) + leaf(120, 80, 10)
+        },
+        winter: {
+          wash: "rgba(111,155,196,0.05)", ink: "#6f9bc4",
+          mask: flake(30, 36, 3.2) + flake(150, 26, 2.2) + flake(96, 90, 3.8) + flake(52, 150, 2.6) + flake(172, 140, 3) + flake(120, 176, 2) + flake(80, 60, 2.4) + flake(190, 84, 2.8) + flake(18, 104, 2)
+        }
+      };
+      var cfg = SEASON_BG[season];
+      if (cfg) {
+        root.style.setProperty("--season-wash", cfg.wash);
+        root.style.setProperty("--season-ink", cfg.ink);
+        root.style.setProperty("--season-mask", maskURI(cfg.mask));
+      }
+    } catch (e) {}
   })();
 
   applyHeaderText(currentNav);
